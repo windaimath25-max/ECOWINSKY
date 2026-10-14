@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ECO WIN SKY - 3D Profesional & Cuaca Dinamis</title>
+<style>
+:root{--bg:#0b1d3a;--panel:#ffffffee;--ink:#12233f;--acc:#ff9f1c;--ok:#2ec4b6;--bad:#e63946;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--panel:#16243dee;--ink:#eaf2ff}}
+:root[data-theme="dark"]{--panel:#16243dee;--ink:#eaf2ff}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;touch-action:none;user-select:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:auto}
+
+#hud{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);padding:8px 12px;display:none;color:#fff;font-weight:700;text-shadow:0 2px 4px #0008;pointer-events:none;z-index:10;}
+#hud .r{display:flex;justify-content:space-between;font-size:clamp(14px,3.5vw,20px)}
+
+/* Panel Soal Semi-Transparan & Proporsional */
+#q { margin:6px auto 4px; max-width:850px; background:rgba(0,0,0,0.45); border-radius:14px; padding:6px 12px; text-align:center; font-size:clamp(13px, 2.5vw, 18px); line-height:1.2; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.15); pointer-events:none; }
+#q .sub { font-size:clamp(10px, 2vw, 14px); font-weight:600; opacity:0.9; margin:2px 0 4px; display:flex; align-items:center; justify-content:center; gap:8px; }
+.chip { display:inline-block; padding:3px 8px; border-radius:8px; color:#fff; font-weight:bold; }
+.q-txt { display:block; font-size:clamp(18px, 3.5vw, 30px); font-weight:800; color:#fff; text-shadow:0 2px 8px rgba(0,0,0,0.8); line-height:1.25; margin-top:4px; }
+#barw { max-width:850px; margin:0 auto; height:8px; background:rgba(0,0,0,0.4); border-radius:4px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); pointer-events:none; }
+#bar{height:100%;width:100%;background:var(--ok);transition:background .3s}
+
+#fb{position:fixed;left:0;right:0;bottom:7%;z-index:4;text-align:center;font-size:clamp(28px,9vw,56px);font-weight:900;color:#fff;text-shadow:0 3px 10px #000a;pointer-events:none;opacity:0;transition:opacity .2s}
+
+.scr{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;overflow:auto;background:#0b1d3a66;z-index:20;}
+.scr.on{display:flex}
+.card{background:var(--panel);color:var(--ink);border-radius:22px;padding:22px;max-width:520px;width:100%;box-shadow:0 12px 40px #0006;text-align:center;touch-action:pan-y;pointer-events:auto;}
+h1{margin:0 0 4px;font-size:clamp(34px,10vw,52px);letter-spacing:2px;color:var(--acc)}
+p{margin:6px 0 12px}
+
+.game-logo { width: clamp(140px, 40vw, 240px); height: auto; margin: 0 auto 12px auto; display: block; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3)); }
+@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+
+input,textarea,select{width:100%;box-sizing:border-box;padding:10px;margin:4px 0;border-radius:10px;border:2px solid #8aa;background:transparent;color:inherit;font:inherit;user-select:text}
+textarea{min-height:60px}
+button{font:inherit;font-weight:800;border:0;border-radius:14px;padding:14px 18px;margin:5px 3px;background:var(--acc);color:#1b1200;cursor:pointer;min-height:48px;pointer-events:auto;}
+button.big{width:100%;font-size:1.25rem;background:var(--ok);color:#00201c}
+button.sec{background:#5b7cfa;color:#fff}
+button.sm{padding:6px 10px;min-height:0;background:var(--bad);color:#fff}
+
+.qi{text-align:left;border:2px dashed #8aa8;border-radius:14px;padding:10px;margin:10px 0}
+.st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:left;font-size:.85rem}
+.res{font-size:1.1rem;line-height:1.7}
+#fl{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:5}
+
+#joy{position:fixed;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:140px;height:140px;border-radius:50%;background:#ffffff26;border:3px solid #ffffff88;display:none;touch-action:none;z-index:15;backdrop-filter:blur(2px);pointer-events:auto;}
+#knob{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;background:#ffffffcc;box-shadow:0 3px 10px #0006;pointer-events:none}
+#ctl{position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));display:none;flex-direction:column;gap:6px;z-index:15;pointer-events:auto;}
+
+#cards{position:fixed;left:50%;top:72%;transform:translate(-50%,-50%);width:min(94vw,720px);display:none;gap:clamp(8px,2vw,18px);z-index:15;pointer-events:auto;}
+#cards.lanes{display:grid;grid-template-columns:repeat(4,1fr)}
+#cards.ans{display:grid;grid-template-columns:repeat(2,1fr)}
+@media (max-width:560px){#cards.lanes{grid-template-columns:repeat(2,1fr);width:min(80vw,380px)}}
+.bx{font:inherit;color:#fff;cursor:pointer;margin:0;padding:12px;min-height:0;border:4px solid var(--c);border-radius:24px;background:linear-gradient(160deg,#0f1d3add,#0b1530dd);box-shadow:0 8px 24px #0008;backdrop-filter:blur(6px);text-align:left;transition:transform .15s,background .15s,border-color .15s;pointer-events:auto;}
+.bx:hover{transform:none;box-shadow:0 8px 24px #0008}
+.bx.sel{transform:scale(1.06);border-color:#fff;background:linear-gradient(160deg,var(--c),#0b1530dd);box-shadow:0 0 22px var(--c)}
+.bx.ok{background:#1b8f4dee;border-color:#9dffc0}
+.bx.no{background:#a3202aee;border-color:#ff9aa2}
+
+.bx.lane{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center}
+.bx .tag{background:var(--c);border-radius:10px;padding:2px 10px;font-weight:900;font-size:clamp(11px,2.6vw,15px);letter-spacing:1px}
+.bx .qm{font-size:clamp(40px,10vw,76px);font-weight:900;line-height:1}
+.bx .ls{font-size:clamp(10px,2.4vw,13px);opacity:.8}
+.bx:not(.lane){display:flex;align-items:center;gap:12px;min-height:clamp(70px,14vh,110px);font-weight:700;font-size:clamp(15px,3.8vw,22px)}
+.bx .lt{flex:none;width:2.1em;height:2.1em;border-radius:50%;background:var(--c);display:grid;place-items:center;font-weight:900}
+
+#cd{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:7;pointer-events:none;font-size:clamp(120px,36vw,300px);font-weight:900;color:#fff;text-shadow:0 8px 40px #000a,0 0 60px var(--acc)}
+#cd span{animation:cdpop .95s ease-out}
+@keyframes cdpop{0%{transform:scale(2.2);opacity:0}30%{transform:scale(1);opacity:1}100%{transform:scale(.8);opacity:.25}}
+.dif{display:block;text-align:left;margin:8px 0}
+.ds{display:block;font-size:.65em;font-weight:600;opacity:.9;margin-top:2px}
+#lightning{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:6}
+#season-badge{position:fixed;top:calc(118px + env(safe-area-inset-top,0px));right:12px;background:#0009;color:#fff;padding:8px 14px;border-radius:20px;font-weight:700;font-size:14px;display:none;backdrop-filter:blur(6px);border:1px solid #ffffff33;z-index:15;pointer-events:none}
+#ctl button{padding:8px 12px;min-height:0;background:#0008;color:#fff}
+.small{font-size:.8rem;opacity:.8}
+
+#lang-box{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:1005;pointer-events:auto;display:flex;align-items:center;gap:6px;background:rgba(11,29,58,0.85);padding:4px 10px;border-radius:16px;border:2px solid var(--acc);backdrop-filter:blur(8px);box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+#lang-sel{width:auto;margin:0;padding:4px 6px;border:0;background:transparent;color:#fff;font-weight:800;font-size:clamp(12px,2.5vw,14px);cursor:pointer;outline:none;}
+#lang-sel option{background:#0b1d3a;color:#fff;font-weight:700;}
+[dir="rtl"] .bx:not(.lane){text-align:right;flex-direction:row-reverse;}
+[dir="rtl"] .dif{text-align:right;}
+
+/* Pintu Airlock (Splash Screen) tanpa garis tengah */
+#splash { position:fixed; inset:0; z-index:999; display:flex; pointer-events:auto; overflow:hidden; }
+#splash-left, #splash-right { width:50%; height:100%; background:rgba(11, 29, 58, 0.75); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:transform 1s cubic-bezier(0.77, 0, 0.175, 1); }
+#splash-content { position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); text-align:center; transition:opacity 0.6s, transform 0.6s; cursor:pointer; z-index:1000; width: 100%; pointer-events:auto; }
+#splash-logo { width:clamp(220px, 50vw, 550px); max-width: 90%; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 15px 35px rgba(0,0,0,0.8)); pointer-events:auto; }
+.splash-text { margin-top:24px; color:#fff; font-weight:900; font-size:clamp(18px, 4vw, 28px); letter-spacing:4px; animation: pulse 1.5s infinite; text-shadow: 0 4px 15px rgba(0,0,0,0.9); }
+#splash.open #splash-left { transform:translateX(-100%); }
+#splash.open #splash-right { transform:translateX(100%); }
+#splash.open #splash-content { opacity:0; transform:translate(-50%, -50%) scale(1.4); pointer-events:none; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<div id="lang-box">
+    <span>🌐</span>
+    <select id="lang-sel" aria-label="Pilih Bahasa">
+        <option value="id">🇮🇩 Indonesia</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="zh">🇨🇳 中文 (Mandarin)</option>
+        <option value="ja">🇯🇵 日本語 (Jepang)</option>
+        <option value="ko">🇰🇷 한국어 (Korea)</option>
+        <option value="ar">🇸🇦 العربية (Arab)</option>
+    </select>
+</div>
+
+<div id="splash">
+    <div id="splash-left"></div>
+    <div id="splash-right"></div>
+    <div id="splash-content">
+        <img src="https://i.ibb.co.com/Q3Lz6snM/TRANSPARAN-Eco-Win-Sky-Eco-Aviation.png" id="splash-logo" alt="Eco Win Sky">
+        <div class="splash-text" id="t-splash">KLIK UNTUK MASUK</div>
+    </div>
+</div>
+
+<canvas id="c"></canvas>
+<div id="hud"><div class="r"><span id="hs">⭐ 0</span><span id="hl">📍 -</span><span id="hn">1/10</span><span id="hv">❤️❤️❤️</span></div><div id="q"></div><div id="barw"><div id="bar"></div></div></div>
+<div id="fb"></div><div id="cards"></div><div id="cd"></div><div id="fl"></div><div id="lightning"></div><div id="season-badge"></div>
+<div id="joy"><div id="knob"></div></div>
+<div id="ctl"><button id="mute">🔊</button><button id="seasonBtn">🌸</button></div>
+
+<div class="scr" id="s-menu"><div class="card">
+<img src="https://i.ibb.co.com/Q3Lz6snM/TRANSPARAN-Eco-Win-Sky-Eco-Aviation.png" class="game-logo" alt="Eco Win Sky">
+<h1>ECO WIN SKY</h1><p id="t-desc">✈️ Terbangkan pesawat menembus <b>cincin jawaban</b> yang benar!<br>♻️🌳 Edisi Adiwiyata: pilah sampah, hijaukan bumi, literasi &amp; numerasi<br>✨ Rasakan sensasi <b>3D Profesional</b> dengan fitur Cuaca Dinamis!</p>
+<input id="nm" placeholder="Ketik Nama Siswa di sini..." maxlength="30">
+<button class="big" id="go">🚀 MULAI PETUALANGAN</button>
+<p class="small"><span id="t-help">Laptop: panah / WASD. Lintasan: terbangi kotak ?. Jawaban: klik/ketuk kotak, panah + Enter, atau joystick (geser lalu lepas). Tombol 🌸 = ganti musim.</span><br><span id="src"></span></p>
+</div></div>
+
+<div class="scr" id="s-diff"><div class="card">
+<h2 style="margin-top:0"><span id="t-hello">Halo</span>, <span id="dn"></span>! 👋</h2><p id="t-pickdiff">Pilih tingkat kesulitan:</p>
+<div id="dlist"></div>
+<button class="sec" id="dBack">← Kembali</button>
+</div></div>
+
+<div class="scr" id="s-ed"><div class="card">
+<h2 style="margin-top:0">Editor Soal</h2>
+<div class="st"><label>Timer (detik)<input id="eT" type="number" min="5" max="120"></label><label>Nyawa<input id="eL" type="number" min="1" max="9"></label><label>Acak soal<select id="eS"><option value="1">Ya</option><option value="0">Tidak</option></select></label></div>
+<div id="list"></div>
+<button class="sec" id="eAdd">+ Tambah Soal</button>
+<details><summary>Export / Import JSON</summary><textarea id="js" style="min-height:120px"></textarea><button class="sec" id="eEx">Export</button><button class="sec" id="eIm">Import</button></details>
+<button class="big" id="eSv">SIMPAN & KEMBALI</button>
+</div></div>
+
+<div class="scr" id="s-sh"><div class="card"><h2 style="margin-top:0">Bagikan ke Siswa</h2><p>Salin link ini. Siswa yang membukanya langsung bermain dengan soalmu.</p><textarea id="lk" style="min-height:110px" readonly></textarea><button id="cp">Salin Link</button><button class="sec" id="shB">Kembali</button></div></div>
+
+<div class="scr" id="s-end"><div class="card"><h1 style="font-size:2rem" id="et">Selesai!</h1><div class="res" id="er"></div>
+<button class="big" id="again">MAIN LAGI</button><button class="sec" id="cc">📋 Salin Rekap Nilai</button><button class="sec" id="mn">Menu</button></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const WEBHOOK_URL = '';
+const BASE_SPEED = 38;
+let SCENE_SPEED = 38;
+const GATE_DIST = 100;
+const GATE_FRAC = 0.7;
+const THEME_EVERY = 1;
+const WEATHER_CHANGE_EVERY = 1;
+
+let curLang = 'id';
+
+const I18N = {
+ id: {
+  splash: "KLIK UNTUK MASUK",
+  desc: "✈️ Terbangkan pesawat menembus <b>cincin jawaban</b> yang benar!<br>♻️🌳 Edisi Adiwiyata: pilah sampah, hijaukan bumi, literasi &amp; numerasi<br>✨ Rasakan sensasi <b>3D Profesional</b> dengan fitur Cuaca Dinamis!",
+  nmPh: "Ketik Nama Siswa di sini...",
+  nmErr: "Isi nama dulu ya…",
+  go: "🚀 MULAI PETUALANGAN",
+  help: "Laptop: panah / WASD. Lintasan: terbangi kotak ?. Jawaban: klik/ketuk kotak, panah + Enter, atau joystick (geser lalu lepas). Tombol 🌸 = ganti musim.",
+  hello: "Halo",
+  pickDiff: "Pilih tingkat kesulitan:",
+  back: "← Kembali",
+  again: "MAIN LAGI",
+  copyRec: "📋 Salin Rekap Nilai",
+  copied: "✔ Tersalin!",
+  copyFail: "Gagal menyalin",
+  menu: "Menu",
+  chooseLane: "PILIH LINTASAN!",
+  chooseLaneSub: (r, tot) => `Soal ke-${r} dari ${tot} — terbangi salah satu kotak ? (joystick / panah / klik kotak)`,
+  mystery: "Soal misteri",
+  lane: "Lintasan",
+  qWord: "Soal",
+  correct: "✔ BENAR! +100",
+  wrong: "✘ SALAH! ",
+  timeout: "⏱ WAKTU HABIS! ",
+  ansWord: "Jawab: ",
+  endPerfect: "🏆 LUAR BIASA! BERHASIL!",
+  endDone: "🎉 Selesai!",
+  endOver: "💥 Nyawa Habis!",
+  congratsPerfect: (r) => `🌟 Selamat! Kamu telah berhasil menyelesaikan seluruh tantangan ${r} soal dengan benar sempurna! 🌟`,
+  congratsDone: "Selamat telah menyelesaikan tantangan soal!",
+  totScore: "Total Skor",
+  lblRight: "Benar",
+  lblWrong: "Salah",
+  lblTime: "Waktu total",
+  secWord: "dtk",
+  timeWord: "Waktu",
+  livesWord: "Nyawa",
+  scoreFixed: "Skor Tetap 100",
+  defaultStudent: "Siswa",
+  lanes: ["MERAH", "KUNING", "BIRU", "HIJAU"],
+  diffs: [{n:"MUDAH",d:"Santai"},{n:"SEDANG",d:"Seimbang"},{n:"SULIT",d:"Cepat & menantang"}],
+  cats: {9851:"Sampah & Adiwiyata",127795:"Penghijauan",128290:"Numerasi",128214:"Literasi",def:"Umum"},
+  seasons: {semi:"Musim Semi",panas:"Musim Panas",gugur:"Musim Gugur",dingin:"Musim Dingin",space:"🚀 Luar Angkasa"},
+  themes: {cityDay:"Kota Siang",cityNight:"Kota Malam",space:"Luar Angkasa",garden:"Kebun Warna-warni",mtn:"Pegunungan",sea:"Laut Berpulau",des:"Gurun",wst:"Padang Tandus",for:"Hutan Rimba",cave:"Goa Kristal"}
+ },
+ en: {
+  splash: "CLICK TO ENTER",
+  desc: "✈️ Fly the plane through the <b>correct answer ring</b>!<br>♻️🌳 Eco-School Edition: sort waste, green the earth, literacy &amp; numeracy<br>✨ Experience <b>Professional 3D</b> with Dynamic Weather!",
+  nmPh: "Type Student Name here...",
+  nmErr: "Please enter your name first…",
+  go: "🚀 START ADVENTURE",
+  help: "Laptop: Arrows / WASD. Lane: fly into a ? box. Answer: click/tap box, arrows + Enter, or joystick (drag & release). 🌸 button = change season.",
+  hello: "Hello",
+  pickDiff: "Choose difficulty level:",
+  back: "← Back",
+  again: "PLAY AGAIN",
+  copyRec: "📋 Copy Score Summary",
+  copied: "✔ Copied!",
+  copyFail: "Failed to copy",
+  menu: "Menu",
+  chooseLane: "CHOOSE A LANE!",
+  chooseLaneSub: (r, tot) => `Question ${r} of ${tot} — fly into one of the ? boxes (joystick / arrows / click box)`,
+  mystery: "Mystery Question",
+  lane: "Lane",
+  qWord: "Question",
+  correct: "✔ CORRECT! +100",
+  wrong: "✘ WRONG! ",
+  timeout: "⏱ TIME'S UP! ",
+  ansWord: "Answer: ",
+  endPerfect: "🏆 AMAZING! SUCCESS!",
+  endDone: "🎉 Finished!",
+  endOver: "💥 Out of Lives!",
+  congratsPerfect: (r) => `🌟 Congratulations! You have completed all ${r} questions with a perfect score! 🌟`,
+  congratsDone: "Congratulations on completing the challenge!",
+  totScore: "Total Score",
+  lblRight: "Correct",
+  lblWrong: "Wrong",
+  lblTime: "Total time",
+  secWord: "sec",
+  timeWord: "Time",
+  livesWord: "Lives",
+  scoreFixed: "Fixed Score 100",
+  defaultStudent: "Student",
+  lanes: ["RED", "YELLOW", "BLUE", "GREEN"],
+  diffs: [{n:"EASY",d:"Relaxed"},{n:"MEDIUM",d:"Balanced"},{n:"HARD",d:"Fast & challenging"}],
+  cats: {9851:"Waste & Eco-School",127795:"Greenery",128290:"Numeracy",128214:"Literacy",def:"General"},
+  seasons: {semi:"Spring",panas:"Summer",gugur:"Autumn",dingin:"Winter",space:"🚀 Outer Space"},
+  themes: {cityDay:"Day City",cityNight:"Night City",space:"Outer Space",garden:"Colorful Garden",mtn:"Mountains",sea:"Island Sea",des:"Desert",wst:"Wasteland",for:"Jungle Forest",cave:"Crystal Cave"}
+ },
+ zh: {
+  splash: "点击进入",
+  desc: "✈️ 驾驶飞机穿过正确的<b>答案光环</b>！<br>♻️🌳 绿色学校版：垃圾分类、绿化地球、读写与算术<br>✨ 体验带有动态天气的<b>专业3D</b>效果！",
+  nmPh: "在此输入学生姓名...",
+  nmErr: "请先输入您的姓名…",
+  go: "🚀 开始冒险",
+  help: "电脑：方向键 / WASD。航道：飞入 ? 方框。回答：点击方框，方向键 + 回车，或摇杆（拖动并松开）。🌸 按钮 = 切换季节。",
+  hello: "你好",
+  pickDiff: "选择难度级别：",
+  back: "← 返回",
+  again: "再玩一次",
+  copyRec: "📋 复制成绩单",
+  copied: "✔ 已复制！",
+  copyFail: "复制失败",
+  menu: "菜单",
+  chooseLane: "选择航道！",
+  chooseLaneSub: (r, tot) => `第 ${r} / ${tot} 题 — 飞入其中一个 ? 方框（摇杆 / 方向键 / 点击）`,
+  mystery: "神秘问题",
+  lane: "航道",
+  qWord: "第",
+  correct: "✔ 回答正确！+100",
+  wrong: "✘ 回答错误！",
+  timeout: "⏱ 时间到！",
+  ansWord: "答案：",
+  endPerfect: "🏆 太棒了！挑战成功！",
+  endDone: "🎉 完成！",
+  endOver: "💥 生命耗尽！",
+  congratsPerfect: (r) => `🌟 恭喜！你以满分完美完成了全部 ${r} 道题的挑战！ 🌟`,
+  congratsDone: "恭喜你完成了题目挑战！",
+  totScore: "总分",
+  lblRight: "正确",
+  lblWrong: "错误",
+  lblTime: "总用时",
+  secWord: "秒",
+  timeWord: "时间",
+  livesWord: "生命",
+  scoreFixed: "固定得分 100",
+  defaultStudent: "学生",
+  lanes: ["红道", "黄道", "蓝道", "绿道"],
+  diffs: [{n:"简单",d:"轻松"},{n:"中等",d:"均衡"},{n:"困难",d:"快速且具挑战性"}],
+  cats: {9851:"垃圾与环保",127795:"绿化植树",128290:"算术",128214:"读写",def:"综合"},
+  seasons: {semi:"春季",panas:"夏季",gugur:"秋季",dingin:"冬季",space:"🚀 外太空"},
+  themes: {cityDay:"白天城市",cityNight:"夜晚城市",space:"外太空",garden:"多彩花园",mtn:"山脉",sea:"海岛",des:"沙漠",wst:"荒原",for:"热带雨林",cave:"水晶洞穴"}
+ },
+ ja: {
+  splash: "クリックして開始",
+  desc: "✈️ 飛行機を操縦して正しい<b>回答リング</b>をくぐり抜けよう！<br>♻️🌳 エコスクール版：ゴミの分別、地球の緑化、読み書きと計算<br>✨ ダイナミックな天候を備えた<b>プロ仕様の3D</b>を体験しよう！",
+  nmPh: "ここに生徒名を入力...",
+  nmErr: "先に名前を入力してください…",
+  go: "🚀 冒険を始める",
+  help: "PC：矢印キー / WASD。レーン：? ボックスへ飛行。回答：ボックスをクリック、矢印 + Enter、またはジョイスティック。🌸 = 季節変更。",
+  hello: "こんにちは",
+  pickDiff: "難易度を選択してください：",
+  back: "← 戻る",
+  again: "もう一度プレイ",
+  copyRec: "📋 スコアをコピー",
+  copied: "✔ コピーしました！",
+  copyFail: "コピー失敗",
+  menu: "メニュー",
+  chooseLane: "レーンを選ぼう！",
+  chooseLaneSub: (r, tot) => `第 ${r} / ${tot} 問 — いずれかの ? ボックスへ飛ぼう（ジョイスティック / 矢印 / クリック）`,
+  mystery: "ミステリー問題",
+  lane: "レーン",
+  qWord: "問題",
+  correct: "✔ 正解！ +100",
+  wrong: "✘ 不正解！ ",
+  timeout: "⏱ 時間切れ！ ",
+  ansWord: "正解: ",
+  endPerfect: "🏆 素晴らしい！大成功！",
+  endDone: "🎉 終了！",
+  endOver: "💥 ライフ切れ！",
+  congratsPerfect: (r) => `🌟 おめでとうございます！全 ${r} 問のチャレンジに全問正解しました！ 🌟`,
+  congratsDone: "チャレンジ完了おめでとうございます！",
+  totScore: "合計スコア",
+  lblRight: "正解",
+  lblWrong: "不正解",
+  lblTime: "合計時間",
+  secWord: "秒",
+  timeWord: "時間",
+  livesWord: "ライフ",
+  scoreFixed: "固定スコア 100",
+  defaultStudent: "生徒",
+  lanes: ["赤", "黄", "青", "緑"],
+  diffs: [{n:"かんたん",d:"リラックス"},{n:"ふつう",d:"バランス"},{n:"むずかしい",d:"速くて手ごわい"}],
+  cats: {9851:"ゴミと環境教育",127795:"緑化活動",128290:"計算",128214:"読み書き",def:"一般"},
+  seasons: {semi:"春",panas:"夏",gugur:"秋",dingin:"冬",space:"🚀 宇宙空間"},
+  themes: {cityDay:"昼の街",cityNight:"夜の街",space:"宇宙空間",garden:"カラフルな庭",mtn:"山脈",sea:"多島海",des:"砂漠",wst:"荒野",for:"ジャングル",cave:"クリスタル洞窟"}
+ },
+ ko: {
+  splash: "클릭하여 입장",
+  desc: "✈️ 비행기를 조종해 올바른 <b>정답 링</b>을 통과하세요!<br>♻️🌳 에코스쿨 에디션: 분리수거, 지구 녹화, 문해력 및 수리력<br>✨ 다이내믹한 날씨와 함께하는 <b>프로페셔널 3D</b>를 경험하세요!",
+  nmPh: "여기에 학생 이름을 입력하세요...",
+  nmErr: "먼저 이름을 입력해 주세요…",
+  go: "🚀 모험 시작하기",
+  help: "노트북: 방향키 / WASD. 경로: ? 상자로 비행. 정답: 상자 클릭/터치, 방향키 + Enter, 또는 조이스틱. 🌸 버튼 = 계절 변경.",
+  hello: "안녕하세요",
+  pickDiff: "난이도를 선택하세요:",
+  back: "← 뒤로",
+  again: "다시 하기",
+  copyRec: "📋 점수 요약 복사",
+  copied: "✔ 복사됨!",
+  copyFail: "복사 실패",
+  menu: "메뉴",
+  chooseLane: "경로를 선택하세요!",
+  chooseLaneSub: (r, tot) => `${tot}문제 중 ${r}번째 — ? 상자 중 하나로 비행하세요 (조이스틱 / 방향키 / 클릭)`,
+  mystery: "미스터리 문제",
+  lane: "경로",
+  qWord: "문제",
+  correct: "✔ 정답! +100",
+  wrong: "✘ 오답! ",
+  timeout: "⏱ 시간 초과! ",
+  ansWord: "정답: ",
+  endPerfect: "🏆 놀라워요! 완벽 성공!",
+  endDone: "🎉 완료!",
+  endOver: "💥 생명 소진!",
+  congratsPerfect: (r) => `🌟 축하합니다! ${r}개의 모든 문제를 완벽하게 맞혔습니다! 🌟`,
+  congratsDone: "문제 도전을 완료한 것을 축하합니다!",
+  totScore: "총점",
+  lblRight: "정답",
+  lblWrong: "오답",
+  lblTime: "총 시간",
+  secWord: "초",
+  timeWord: "시간",
+  livesWord: "생명",
+  scoreFixed: "고정 점수 100",
+  defaultStudent: "학생",
+  lanes: ["빨강", "노랑", "파랑", "초록"],
+  diffs: [{n:"쉬움",d:"여유로움"},{n:"보통",d:"균형잡힘"},{n:"어려움",d:"빠르고 도전적"}],
+  cats: {9851:"폐기물 및 환경",127795:"녹화 사업",128290:"수리력",128214:"문해력",def:"일반"},
+  seasons: {semi:"봄",panas:"여름",gugur:"가을",dingin:"겨울",space:"🚀 우주 공간"},
+  themes: {cityDay:"낮의 도시",cityNight:"밤의 도시",space:"우주 공간",garden:"다채로운 정원",mtn:"산맥",sea:"다도해",des:"사막",wst:"황무지",for:"정글 숲",cave:"크리스탈 동굴"}
+ },
+ ar: {
+  splash: "انقر للدخول",
+  desc: "✈️ قُد الطائرة عبر <b>حلقة الإجابة</b> الصحيحة!<br>♻️🌳 نسخة المدرسة البيئية: فرز النفايات، تخضير الأرض، القراءة والحساب<br>✨ استمتع بتجربة <b>ثلاثية الأبعاد احترافية</b> مع طقس ديناميكي!",
+  nmPh: "اكتب اسم الطالب هنا...",
+  nmErr: "يرجى إدخال الاسم أولاً…",
+  go: "🚀 ابدأ المغامرة",
+  help: "الحاسوب: الأسهم / WASD. المسار: طِر نحو صندوق ?. الإجابة: انقر على الصندوق، الأسهم + Enter، أو عصا التحكم. زر 🌸 = تغيير الفصل.",
+  hello: "مرحباً",
+  pickDiff: "اختر مستوى الصعوبة:",
+  back: "→ رجوع",
+  again: "العب مرة أخرى",
+  copyRec: "📋 نسخ ملخص النتيجة",
+  copied: "✔ تم النسخ!",
+  copyFail: "فشل النسخ",
+  menu: "القائمة",
+  chooseLane: "اختر المسار!",
+  chooseLaneSub: (r, tot) => `السؤال ${r} من ${tot} — طِر نحو أحد صناديق ? (عصا التحكم / الأسهم / النقر)`,
+  mystery: "سؤال غامض",
+  lane: "المسار",
+  qWord: "سؤال",
+  correct: "✔ إجابة صحيحة! +100",
+  wrong: "✘ إجابة خاطئة! ",
+  timeout: "⏱ انتهى الوقت! ",
+  ansWord: "الإجابة: ",
+  endPerfect: "🏆 رائع! نجاح باهر!",
+  endDone: "🎉 انتهى!",
+  endOver: "💥 نفدت القلوب!",
+  congratsPerfect: (r) => `🌟 تهانينا! لقد أتممت جميع تحديات الأسئلة الـ ${r} بإجابات صحيحة تماماً! 🌟`,
+  congratsDone: "تهانينا على إكمال تحدي الأسئلة!",
+  totScore: "مجموع النقاط",
+  lblRight: "صحيح",
+  lblWrong: "خطأ",
+  lblTime: "الوقت الإجمالي",
+  secWord: "ثانية",
+  timeWord: "الوقت",
+  livesWord: "القلوب",
+  scoreFixed: "نقاط ثابتة 100",
+  defaultStudent: "طالب",
+  lanes: ["الأحمر", "الأصفر", "الأزرق", "الأخضر"],
+  diffs: [{n:"سهل",d:"مريح"},{n:"متوسط",d:"متوازن"},{n:"صعب",d:"سريع ومليء بالتحدي"}],
+  cats: {9851:"النفايات والبيئة",127795:"التشجير",128290:"الحساب",128214:"القراءة",def:"عام"},
+  seasons: {semi:"الربيع",panas:"الصيف",gugur:"الخريف",dingin:"الشتاء",space:"🚀 الفضاء الخارجي"},
+  themes: {cityDay:"المدينة نهاراً",cityNight:"المدينة ليلاً",space:"الفضاء الخارجي",garden:"الحديقة الملونة",mtn:"الجبال",sea:"بحر الجزر",des:"الصحراء",wst:"الأرض القاحلة",for:"غابة الأدغال",cave:"الكهف الكريستالي"}
+ }
+};
+
+const RAW_BANK = {
+ id: [
+  ["♻️ Sampah plastik sebaiknya dibuang ke tempat sampah berwarna...",["Kuning","Hijau","Merah","Biru"],0,0],
+  ["♻️ Daun gugur di halaman sekolah termasuk jenis sampah...",["Organik","Anorganik","B3","Residu"],0,0],
+  ["🌳 Tujuan utama penanaman pohon di sekolah adalah...",["Menyejukkan udara","Mengotori halaman","Menambah nyamuk","Menebang pohon lama"],0,0],
+  ["♻️ Program Adiwiyata bertujuan untuk...",["Mewujudkan sekolah peduli lingkungan","Membuat sekolah mahal","Menghukum siswa","Mengurangi jam belajar"],0,0],
+  ["♻️ Botol kaca bekas sirup termasuk sampah...",["Anorganik","Organik","B3","Basah"],0,0],
+  ["♻️ Singkatan dari 3R adalah...",["Reduce, Reuse, Recycle","Read, Write, Run","Repair, Restore, Rent","Reduce, Remake, Role"],0,0],
+  ["♻️ Menggunakan kembali botol bekas menjadi pot tanaman disebut...",["Reuse","Reduce","Recycle","Replace"],0,0],
+  ["🌳 Sampah organik sangat baik diolah menjadi...",["Kompos","Plastik","Kertas","Kaca"],0,0],
+  ["♻️ Membawa botol minum sendiri dari rumah merupakan tindakan...",["Reduce","Reuse","Recycle","Residu"],0,0],
+  ["♻️ Tempat sampah warna hijau dikhususkan untuk...",["Sampah organik","Sampah B3","Kertas","Plastik"],0,0],
+  ["🌳 Hari Lingkungan Hidup Sedunia diperingati setiap tanggal...",["5 Juni","21 April","17 Agustus","2 Mei"],0,0],
+  ["♻️ Membuang sampah sembarangan di selokan dapat menyebabkan...",["Banjir","Udara segar","Ikan subur","Tanaman tumbuh"],0,0],
+  ["♻️ Kertas bekas dapat didaur ulang menjadi...",["Kertas baru / Karton","Plastik","Kaca","Daun"],0,0],
+  ["🌳 Menanam tanaman di pot gantung berguna untuk...",["Penghijauan lahan sempit","Menambah nyamuk","Menghalangi jalan","Merusak atap"],0,0],
+  ["🌳 Air bekas cucian beras sebaiknya...",["Disiramkan ke tanaman","Dibuang ke jalan","Diminum","Direbus"],0,0],
+  ["♻️ Sampah yang mudah membusuk disebut...",["Organik","Anorganik","B3","Kering"],0,0],
+  ["♻️ Contoh sampah anorganik adalah...",["Plastik dan kaleng","Sisa makanan","Daun kering","Kulit pisang"],0,0],
+  ["🌳 Kebersihan kelas adalah tanggung jawab...",["Semua warga kelas","Guru saja","Petugas kebersihan","Kepala sekolah"],0,0],
+  ["🌳 Tanaman lidah mertua di dalam kelas berguna untuk...",["Menyerap polusi udara","Menghasilkan buah","Hiasan berduri","Menambah debu"],0,0],
+  ["♻️ Menghemat air di sekolah bisa dilakukan dengan...",["Mematikan keran setelah dipakai","Membiarkan keran menetes","Bermain air","Menyiram jalanan"],0,0],
+  ["♻️ Berikut ini yang termasuk sampah B3 (Bahan Berbahaya dan Beracun) adalah...",["Baterai bekas","Kertas HVS","Botol plastik","Sisa apel"],0,1],
+  ["🌳 Proses penguraian sampah organik tanpa oksigen menghasilkan gas...",["Metana","Oksigen","Karbon dioksida","Nitrogen"],0,1],
+  ["♻️ Salah satu indikator sekolah Adiwiyata adalah adanya...",["Kebijakan berwawasan lingkungan","Gedung bertingkat 5","Lapangan rumput sintetis","AC di setiap kelas"],0,1],
+  ["🌳 Pembuatan kompos menggunakan bantuan cacing disebut...",["Vermikompos","Takakura","Biopori","Anaerob"],0,1],
+  ["🌳 Lubang resapan biopori berfungsi utama untuk...",["Meresapkan air hujan","Tempat buang plastik","Menangkap serangga","Mengubur hewan mati"],0,1],
+  ["♻️ Efek rumah kaca secara alami berfungsi untuk...",["Menghangatkan suhu bumi","Melubangi ozon","Mencairkan seluruh es","Membuat badai"],0,1],
+  ["♻️ Membeli produk dengan kemasan yang bisa diisi ulang adalah contoh penerapan...",["Reduce","Reuse","Recycle","Replace"],0,1],
+  ["♻️ Sampah residu yang sulit didaur ulang sebaiknya...",["Dibuang ke TPA","Dibakar di halaman","Dikubur dekat sumur","Dibuang ke laut"],0,1],
+  ["🌳 Hari Peduli Sampah Nasional diperingati tanggal 21 Februari mengenang tragedi...",["Longsor TPA Leuwigajah","Tsunami Aceh","Banjir Jakarta","Letusan Gunung Merapi"],0,1],
+  ["♻️ Mengubah sampah kertas menjadi bubur kertas dan mencetaknya lagi disebut...",["Recycle","Reduce","Reuse","Repair"],0,1],
+  ["♻️ Penghematan energi di sekolah dapat dilakukan dengan...",["Membuka tirai untuk cahaya alami","Menyalakan lampu di siang hari","Membiarkan komputer menyala","Menggunakan kipas saat hujan"],0,1],
+  ["🌳 Komponen biotik dalam ekosistem sekolah meliputi...",["Guru, siswa, dan tanaman","Gedung dan meja","Udara dan air","Cahaya matahari dan tanah"],0,1],
+  ["🌳 Menanam berbagai jenis tanaman di sekolah bertujuan untuk menjaga...",["Keanekaragaman hayati","Gengsi sekolah","Kesibukan siswa","Harga tanah"],0,1],
+  ["🌳 Tanaman merambat (vertical garden) efektif untuk...",["Mengurangi suhu panas dinding","Merusak cat dinding","Sarang laba-laba","Menutupi jendela"],0,1],
+  ["♻️ Berikut adalah inovasi pengelolaan sampah di sekolah, kecuali...",["Membakar sampah di lapangan","Membuat bank sampah","Membuat eco-enzyme","Botol sebagai ecobrick"],0,1],
+  ["♻️ Gas CFC yang banyak digunakan pada AC dan kulkas dapat menyebabkan...",["Penipisan lapisan ozon","Hujan asam","Eutrofikasi","Gempa bumi"],0,1],
+  ["🌳 Upaya mencegah erosi tanah di area sekolah yang miring adalah...",["Membuat terasering & menanam","Menyemen seluruh area","Menggali tanah","Menebang pohon"],0,1],
+  ["♻️ Sampah elektronik (e-waste) berbahaya karena mengandung...",["Logam berat beracun","Gas oksigen","Mineral bernutrisi","Vitamin C"],0,1],
+  ["♻️ Menggunakan tas kain untuk menghindari kantong kresek adalah tindakan...",["Reduce","Recycle","Replace","Replant"],0,1],
+  ["🌳 Eco-enzyme dibuat dari fermentasi...",["Sisa buah/sayur, gula merah, air","Plastik dan ragi","Daun kering dan garam","Daging dan cuka"],0,1],
+  ["♻️ Program Adiwiyata diatur secara nasional oleh kementerian...",["Lingkungan Hidup & Kehutanan","Kesehatan","Keuangan","Pertahanan"],0,2],
+  ["♻️ Prinsip utama dalam ekonomi sirkular pengelolaan sampah adalah...",["Mempertahankan nilai produk selama mungkin","Membuang setelah sekali pakai","Membakar residu","Mengimpor sampah"],0,2],
+  ["🌳 Penghargaan Adiwiyata Mandiri diberikan kepada sekolah yang...",["Membina sekolah lain menjadi Adiwiyata","Memiliki gedung baru","Lulus ujian 100%","Mendapat dana BOS terbesar"],0,2],
+  ["♻️ Gas rumah kaca paling dominan dari dekomposisi sampah di TPA adalah...",["Metana (CH4)","Karbon monoksida (CO)","Sulfur dioksida (SO2)","Klorofluorokarbon (CFC)"],0,2],
+  ["🌳 Metode Takakura untuk membuat kompos menggunakan prinsip...",["Fermentasi aerob mikroorganisme","Pembakaran suhu tinggi","Penguburan anaerob","Reaksi kimia sintetis"],0,2],
+  ["♻️ Hujan asam disebabkan oleh tingginya konsentrasi polutan...",["SO2 dan NOx","O2 dan H2O","N2 dan O3","CO2 dan CH4"],0,2],
+  ["🌳 Parameter mengukur tingkat pencemaran bahan organik dalam air disebut...",["BOD dan COD","pH dan Suhu","Salinitas dan Kekeruhan","Oksigen terlarut (DO) maksimal"],0,2],
+  ["🌳 Fitoremediasi adalah upaya pemulihan lingkungan tercemar menggunakan...",["Tanaman tertentu","Bakteri kimiawi","Alat penyaring udara","Reaktor nuklir"],0,2],
+  ["♻️ Kebijakan Extended Producer Responsibility (EPR) menuntut...",["Produsen bertanggung jawab atas sampah kemasannya","Konsumen berhenti belanja","Pemerintah menanggung biaya","Pemulung mencari plastik"],0,2],
+  ["♻️ Plastik jenis Polietilena Tereftalat (PET) biasanya digunakan untuk...",["Botol air mineral transparan","Pipa air PVC","Styrofoam makanan","Kantong kresek hitam"],0,2],
+  ["🌳 Eutrofikasi di perairan sekitar sekolah dapat dipicu oleh pembuangan...",["Limbah deterjen kaya fosfat","Daun kering dan kayu","Air hujan bersih","Kertas bekas"],0,2],
+  ["🌳 Tanaman yang direkomendasikan untuk menyerap logam berat di tanah adalah...",["Akar wangi (Vetiver)","Padi","Jagung","Mawar"],0,2],
+  ["♻️ Syarat utama keberhasilan pembuatan eco-enzyme adalah kondisi...",["Anaerobik yang tertutup rapat","Terpapar sinar matahari langsung","Udara terbuka","Diaduk setiap 1 jam"],0,2],
+  ["🌳 Dalam struktur kurikulum Adiwiyata, integrasi lingkungan hidup disebut...",["PLH Terintegrasi","Mata pelajaran ekstra wajib","Ekskul olahraga","Ujian Nasional Lingkungan"],0,2],
+  ["♻️ Untuk mengurangi jejak karbon (carbon footprint) sekolah, tindakan paling signifikan...",["Panel surya & efisiensi listrik","Mengganti seragam rutin","Membeli komputer baru terus","Mengecat dinding tiap bulan"],0,2],
+  ["♻️ Senyawa mikroplastik merupakan ancaman lingkungan yang berukuran...",["Kurang dari 5 mm","Lebih dari 5 cm","1-2 meter","Hanya terlihat di mikroskop elektron"],0,2],
+  ["🌳 Kegiatan merawat sumur resapan masuk dalam komponen Adiwiyata...",["Pengelolaan sarana pendukung","Kurikulum integrasi","Kebijakan sekolah","Anggaran pendidikan"],0,2],
+  ["♻️ Memanfaatkan kotoran ternak menjadi biogas menghasilkan energi utama berupa gas...",["Metana","Propana","Butana","Etana"],0,2],
+  ["♻️ Indeks Kualitas Udara (AQI) level Sangat Tidak Sehat berada di angka...",["201 - 300","0 - 50","51 - 100","101 - 150"],0,2],
+  ["🌳 Deklarasi internasional pertama yang menyoroti pendidikan lingkungan hidup global adalah...",["Deklarasi Tbilisi (1977)","Protokol Kyoto","Perjanjian Paris","Konvensi Ramsar"],0,2]
+ ],
+ en: [
+  ["♻️ Plastic waste should be thrown into the bin colored...",["Yellow","Green","Red","Blue"],0,0],
+  ["♻️ Fallen leaves in the schoolyard belong to which type of waste?",["Organic","Inorganic","Hazardous (B3)","Residue"],0,0],
+  ["🌳 The main purpose of planting trees at school is...",["Cooling the air","Making the yard dirty","Adding mosquitoes","Cutting old trees"],0,0],
+  ["♻️ The Eco-School (Adiwiyata) program aims to...",["Create environmentally friendly schools","Make school expensive","Punish students","Reduce study hours"],0,0],
+  ["♻️ Used glass syrup bottles are classified as...",["Inorganic waste","Organic waste","Hazardous waste","Wet waste"],0,0],
+  ["♻️ What does 3R stand for?",["Reduce, Reuse, Recycle","Read, Write, Run","Repair, Restore, Rent","Reduce, Remake, Role"],0,0],
+  ["♻️ Reusing old plastic bottles as plant pots is called...",["Reuse","Reduce","Recycle","Replace"],0,0],
+  ["🌳 Organic waste is best processed into...",["Compost","Plastic","Paper","Glass"],0,0],
+  ["♻️ Bringing your own tumbler from home is an act of...",["Reduce","Reuse","Recycle","Residue"],0,0],
+  ["♻️ The green trash bin is specifically for...",["Organic waste","Hazardous waste","Paper","Plastic"],0,0],
+  ["🌳 World Environment Day is celebrated every year on...",["June 5","April 21","August 17","May 2"],0,0],
+  ["♻️ Littering in drains or gutters can cause...",["Flooding","Fresh air","Healthy fish","Plant growth"],0,0],
+  ["♻️ Used paper can be recycled into...",["New paper / Cardboard","Plastic","Glass","Leaves"],0,0],
+  ["🌳 Planting in hanging pots is useful for...",["Greening limited spaces","Adding mosquitoes","Blocking roads","Damaging roofs"],0,0],
+  ["🌳 Water used from washing rice should best be...",["Watered onto plants","Thrown on the road","Drunk","Boiled"],0,0],
+  ["♻️ Waste that easily decomposes is called...",["Organic","Inorganic","Hazardous","Dry"],0,0],
+  ["♻️ Examples of inorganic waste are...",["Plastic and cans","Food scraps","Dry leaves","Banana peels"],0,0],
+  ["🌳 Classroom cleanliness is the responsibility of...",["All class members","Teachers only","Janitors only","The Principal"],0,0],
+  ["🌳 Snake plants (Sansevieria) inside the classroom are useful for...",["Absorbing air pollution","Producing fruit","Thorny decoration","Adding dust"],0,0],
+  ["♻️ Saving water at school can be done by...",["Turning off taps after use","Letting taps drip","Playing with water","Watering the street"],0,0],
+  ["♻️ Which of the following is Hazardous & Toxic Waste (B3)?",["Used batteries","Copy paper","Plastic bottles","Apple cores"],0,1],
+  ["🌳 Decomposing organic waste without oxygen produces which gas?",["Methane","Oxygen","Carbon dioxide","Nitrogen"],0,1],
+  ["♻️ One indicator of an Eco-School is having...",["Environmentally friendly policies","A 5-story building","Synthetic turf fields","AC in every classroom"],0,1],
+  ["🌳 Making compost with the help of worms is called...",["Vermicompost","Takakura","Biopore","Anaerobic"],0,1],
+  ["🌳 Biopore infiltration holes mainly function to...",["Absorb rainwater into the soil","Dump plastic waste","Trap insects","Bury dead animals"],0,1],
+  ["♻️ The natural greenhouse effect functions to...",["Warm the Earth's temperature","Make holes in the ozone","Melt all ice","Create storms"],0,1],
+  ["♻️ Buying products with refillable packaging is an example of...",["Reduce","Reuse","Recycle","Replace"],0,1],
+  ["♻️ Residual waste that cannot be recycled should be...",["Sent to a sanitary landfill","Burned in the yard","Buried near wells","Dumped into the sea"],0,1],
+  ["🌳 Indonesia's National Waste Awareness Day on Feb 21 commemorates...",["Leuwigajah landfill landslide","Aceh Tsunami","Jakarta Flood","Mount Merapi eruption"],0,1],
+  ["♻️ Turning waste paper into pulp and printing it again is called...",["Recycle","Reduce","Reuse","Repair"],0,1],
+  ["♻️ Saving energy at school can be achieved by...",["Opening curtains for natural light","Turning on lights at noon","Leaving computers on","Using fans in the rain"],0,1],
+  ["🌳 Biotic components in a school ecosystem include...",["Teachers, students, and plants","Buildings and desks","Air and water","Sunlight and soil"],0,1],
+  ["🌳 Planting diverse plant species at school aims to maintain...",["Biodiversity","School prestige","Student busyness","Land prices"],0,1],
+  ["🌳 Climbing plants (vertical gardens) are effective for...",["Reducing wall heat temperature","Damaging wall paint","Spider nests","Blocking windows"],0,1],
+  ["♻️ The following are school waste management innovations, EXCEPT...",["Burning trash in the field","Creating a waste bank","Making eco-enzyme","Making ecobricks from bottles"],0,1],
+  ["♻️ CFC gases formerly used in ACs and refrigerators cause...",["Ozone layer depletion","Acid rain","Eutrophication","Earthquakes"],0,1],
+  ["🌳 To prevent soil erosion on sloped school areas, we should...",["Build terraces & plant trees","Cement the whole area","Dig up the soil","Cut down trees"],0,1],
+  ["♻️ Electronic waste (e-waste) is dangerous because it contains...",["Toxic heavy metals","Oxygen gas","Nutritious minerals","Vitamin C"],0,1],
+  ["♻️ Using cloth bags to avoid single-use plastic bags is an act of...",["Reduce","Recycle","Replace","Replant"],0,1],
+  ["🌳 Eco-enzyme is made from the fermentation of...",["Fruit/veggie scraps, brown sugar, water","Plastic and yeast","Dry leaves and salt","Meat and vinegar"],0,1],
+  ["♻️ The national Adiwiyata Eco-School program is regulated by the Ministry of...",["Environment & Forestry","Health","Finance","Defense"],0,2],
+  ["♻️ The core principle of a circular economy in waste management is...",["Keeping product value as long as possible","Disposing after single use","Burning residue","Importing waste"],0,2],
+  ["🌳 The Independent Eco-School (Adiwiyata Mandiri) award is given to schools that...",["Mentor other schools to become Eco-Schools","Have new buildings","Pass exams 100%","Receive the largest funding"],0,2],
+  ["♻️ The most dominant greenhouse gas from landfill waste decomposition is...",["Methane (CH4)","Carbon monoxide (CO)","Sulfur dioxide (SO2)","Chlorofluorocarbon (CFC)"],0,2],
+  ["🌳 The Takakura composting method uses the principle of...",["Aerobic fermentation by microorganisms","High-temperature burning","Anaerobic burial","Synthetic chemical reaction"],0,2],
+  ["♻️ Acid rain is caused by high concentrations of which pollutants?",["SO2 and NOx","O2 and H2O","N2 and O3","CO2 and CH4"],0,2],
+  ["🌳 Parameters used to measure organic pollution levels in water are...",["BOD and COD","pH and Temperature","Salinity and Turbidity","Maximum Dissolved Oxygen"],0,2],
+  ["🌳 Phytoremediation is the restoration of polluted environments using...",["Specific plants","Chemical bacteria","Air filters","Nuclear reactors"],0,2],
+  ["♻️ Extended Producer Responsibility (EPR) policy requires...",["Producers to be responsible for their packaging waste","Consumers to stop shopping","Government to pay all costs","Scavengers to collect plastic"],0,2],
+  ["♻️ Polyethylene Terephthalate (PET) plastic is commonly used for...",["Clear mineral water bottles","PVC water pipes","Food styrofoam","Black plastic bags"],0,2],
+  ["🌳 Eutrophication in waters near school can be triggered by discharging...",["Phosphate-rich detergent waste","Dry leaves and wood","Clean rainwater","Used paper"],0,2],
+  ["🌳 A recommended plant for absorbing heavy metals in soil is...",["Vetiver grass","Rice","Corn","Rose"],0,2],
+  ["♻️ The main requirement for successful eco-enzyme production is...",["Tightly sealed anaerobic condition","Direct sunlight exposure","Open air","Stirring every hour"],0,2],
+  ["🌳 In the Eco-School curriculum, environmental integration is known as...",["Integrated Environmental Education","Mandatory extra subject","Sports club","National Eco Exam"],0,2],
+  ["♻️ To significantly reduce a school's carbon footprint, the best action is...",["Solar panels & electrical efficiency","Changing uniforms often","Buying new computers constantly","Painting walls monthly"],0,2],
+  ["♻️ Microplastics are an environmental threat defined as particles measuring...",["Less than 5 mm","More than 5 cm","1-2 meters","Only visible via electron microscope"],0,2],
+  ["🌳 Maintaining infiltration wells falls under which Eco-School component?",["Management of eco-friendly supporting facilities","Integrated curriculum","School policy","Education budget"],0,2],
+  ["♻️ Converting livestock manure into biogas produces main energy in the form of...",["Methane","Propane","Butane","Ethane"],0,2],
+  ["♻️ The Air Quality Index (AQI) level for 'Very Unhealthy' is in the range of...",["201 - 300","0 - 50","51 - 100","101 - 150"],0,2],
+  ["🌳 The first international declaration highlighting global environmental education is...",["Tbilisi Declaration (1977)","Kyoto Protocol","Paris Agreement","Ramsar Convention"],0,2]
+ ],
+ zh: [
+  ["♻️ 塑料垃圾应该扔进什么颜色的垃圾桶？",["黄色","绿色","红色","蓝色"],0,0],
+  ["♻️ 校园里的落叶属于哪种垃圾？",["有机垃圾","无机垃圾","有害垃圾 (B3)","其他垃圾"],0,0],
+  ["🌳 在学校植树的主要目的是...",["净化与降温空气","弄脏校园","增加蚊虫","砍伐老树"],0,0],
+  ["♻️ 绿色学校 (Adiwiyata) 计划旨在...",["建设具有环保意识的学校","让学费变贵","惩罚学生","减少学习时间"],0,0],
+  ["♻️ 用过的玻璃糖浆瓶属于...",["无机垃圾","有机垃圾","有害垃圾","湿垃圾"],0,0],
+  ["♻️ 环保 3R 原则代表什么？",["减量、重用、再循环 (Reduce, Reuse, Recycle)","阅读、写作、奔跑","修理、恢复、租赁","减少、重做、角色"],0,0],
+  ["♻️ 将旧塑料瓶重新用作花盆被称为...",["重用 (Reuse)","减量 (Reduce)","再循环 (Recycle)","替代 (Replace)"],0,0],
+  ["🌳 有机垃圾非常适合加工成...",["堆肥","塑料","纸张","玻璃"],0,0],
+  ["♻️ 从家里自带水杯上学属于哪种环保行为？",["减量 (Reduce)","重用 (Reuse)","再循环 (Recycle)","残留 (Residu)"],0,0],
+  ["♻️ 绿色垃圾桶专门用于投放...",["有机垃圾","有害垃圾","纸张","塑料"],0,0],
+  ["🌳 世界环境日是每年的哪一天？",["6月5日","4月21日","8月17日","5月2日"],0,0],
+  ["♻️ 在排水沟乱扔垃圾会导致...",["洪水泛滥","空气清新","鱼类繁殖","植物生长"],0,0],
+  ["♻️ 废纸可以回收再造成...",["新纸张 / 纸板","塑料","玻璃","树叶"],0,0],
+  ["🌳 在吊盆中种植植物有助于...",["狭小空间的绿化","增加蚊子","阻碍道路","损坏屋顶"],0,0],
+  ["🌳 淘米水最好用来...",["浇灌植物","倒在马路上","直接饮用","煮沸"],0,0],
+  ["♻️ 容易腐烂分解的垃圾被称为...",["有机垃圾","无机垃圾","有害垃圾","干垃圾"],0,0],
+  ["♻️ 以下属于无机垃圾的是...",["塑料和易拉罐","食物残渣","干树叶","香蕉皮"],0,0],
+  ["🌳 教室的清洁卫生是谁的责任？",["全班所有成员","仅老师","仅清洁工","校长"],0,0],
+  ["🌳 教室里种植虎尾兰有助于...",["吸收空气污染物","结出果实","带刺装饰","增加灰尘"],0,0],
+  ["♻️ 在学校节约用水可以通过以下方式实现...",["用完后关闭水龙头","让水龙头滴水","玩水","浇马路"],0,0],
+  ["♻️ 以下哪项属于有毒有害垃圾 (B3)？",["废旧电池","打印纸","塑料瓶","苹果核"],0,1],
+  ["🌳 有机垃圾在无氧条件下分解会产生什么气体？",["甲烷","氧气","二氧化碳","氮气"],0,1],
+  ["♻️ 绿色学校的一个重要指标是拥有...",["环保导向的学校政策","5层教学楼","人工草坪球场","每间教室装空调"],0,1],
+  ["🌳 利用蚯蚓帮助制作堆肥的方法被称为...",["蚯蚓堆肥 (Vermicompost)","高仓式堆肥","生物孔","厌氧发酵"],0,1],
+  ["🌳 生物孔渗水洞的主要功能是...",["将雨水渗入地下","倾倒塑料垃圾","捕捉昆虫","掩埋死动物"],0,1],
+  ["♻️ 自然温室效应的作用是...",["保持地球温度温暖","破坏臭氧层","融化所有冰川","制造风暴"],0,1],
+  ["♻️ 购买可补充装的产品是践行...",["减量 (Reduce)","重用 (Reuse)","再循环 (Recycle)","替代 (Replace)"],0,1],
+  ["♻️ 难以回收的残留垃圾应该...",["运往垃圾填埋场处理","在院子里焚烧","埋在水井旁","倒入大海"],0,1],
+  ["🌳 印尼2月21日国家垃圾关怀日是为了纪念哪场悲剧？",["Leuwigajah 垃圾场滑坡","亚齐海啸","雅加达洪水","默拉皮火山爆发"],0,1],
+  ["♻️ 将废纸变成纸浆并重新印制成纸被称为...",["再循环 (Recycle)","减量 (Reduce)","重用 (Reuse)","修复 (Repair)"],0,1],
+  ["♻️ 在学校节约能源可以通过以下方式进行...",["拉开窗帘利用自然光","白天开灯","让电脑一直开着","下雨天开风扇"],0,1],
+  ["🌳 校园生态系统中的生物成分包括...",["老师、学生和植物","建筑和课桌","空气和水","阳光和土壤"],0,1],
+  ["🌳 在学校种植多种植物旨在保护...",["生物多样性","学校声誉","学生忙碌度","土地价格"],0,1],
+  ["🌳 攀援植物（垂直花园）可以有效...",["降低墙壁温度","损坏墙面漆","吸引蜘蛛筑巢","遮挡窗户"],0,1],
+  ["♻️ 以下是学校垃圾管理创新，除了...",["在操场上焚烧垃圾","建立垃圾银行","制作环保酵素","用瓶子制作生态砖"],0,1],
+  ["♻️ 过去空调和冰箱常用的氟利昂 (CFC) 会导致...",["臭氧层空洞","酸雨","水体富营养化","地震"],0,1],
+  ["🌳 防止学校斜坡区域水土流失的措施是...",["修筑梯田并植树","全部铺水泥","挖掘土壤","砍伐树木"],0,1],
+  ["♻️ 电子垃圾 (e-waste) 很危险，因为它含有...",["有毒重金属","氧气","营养矿物质","维生素C"],0,1],
+  ["♻️ 使用布袋代替一次性塑料袋属于...",["减量 (Reduce)","再循环 (Recycle)","替代 (Replace)","补种 (Replant)"],0,1],
+  ["🌳 环保酵素 (Eco-enzyme) 是由什么发酵制成的？",["果蔬残渣、红糖、水","塑料和酵母","干树叶和盐","肉类和醋"],0,1],
+  ["♻️ 印尼国家绿色学校计划由哪个部门监管？",["环境与林业部","卫生部","财政部","国防部"],0,2],
+  ["♻️ 垃圾管理循环经济的核心原则是...",["尽可能长时间地保持产品价值","用完即弃","焚烧残留物","进口垃圾"],0,2],
+  ["🌳 独立绿色学校奖 (Adiwiyata Mandiri) 授予那些...",["指导其他学校成为绿色学校的学校","拥有新大楼的学校","考试通过率100%的学校","获得最多资金的学校"],0,2],
+  ["♻️ 垃圾填埋场分解产生的最主要温室气体是...",["甲烷 (CH4)","一氧化碳 (CO)","二氧化硫 (SO2)","氯氟烃 (CFC)"],0,2],
+  ["🌳 高仓式 (Takakura) 堆肥法使用的原理是...",["微生物好氧发酵","高温焚烧","厌氧掩埋","合成化学反应"],0,2],
+  ["♻️ 酸雨是由高浓度的哪些污染物引起的？",["SO2 和 NOx","O2 和 H2O","N2 和 O3","CO2 和 CH4"],0,2],
+  ["🌳 衡量水中有机污染物含量的参数被称为...",["BOD 和 COD","pH值与温度","盐度与浊度","最大溶解氧"],0,2],
+  ["🌳 植物修复技术 (Phytoremediation) 是利用什么恢复受污染环境？",["特定植物","化学细菌","空气过滤器","核反应堆"],0,2],
+  ["♻️ 生产者责任延伸制度 (EPR) 要求...",["生产商对其包装废弃物负责","消费者停止购物","政府承担所有费用","拾荒者收集塑料"],0,2],
+  ["♻️ 聚对苯二甲酸乙二醇酯 (PET) 塑料通常用于...",["透明矿泉水瓶","PVC水管","食品泡沫箱","黑色塑料袋"],0,2],
+  ["🌳 学校附近水域的富营养化可能由排放什么引起？",["富含磷酸盐的洗涤剂废水","干树叶和木头","干净的雨水","废纸"],0,2],
+  ["🌳 推荐用于吸收土壤中重金属的植物是...",["香根草 (Vetiver)","水稻","玉米","玫瑰"],0,2],
+  ["♻️ 成功制作环保酵素的主要条件是...",["密封的厌氧环境","阳光直射","露天环境","每小时搅拌一次"],0,2],
+  ["🌳 在绿色学校课程结构中，环境融合被称为...",["综合环境教育","必修附加课","体育俱乐部","国家环境考试"],0,2],
+  ["♻️ 为了显著减少学校的碳足迹，最有效的行动是...",["使用太阳能电池板与节电","经常更换校服","不断购买新电脑","每月粉刷墙壁"],0,2],
+  ["♻️ 微塑料是一种环境威胁，其颗粒尺寸定义为...",["小于 5 毫米","大于 5 厘米","1-2 米","仅电子显微镜可见"],0,2],
+  ["🌳 维护渗水井属于绿色学校的哪个组成部分？",["环保配套设施管理","综合课程","学校政策","教育预算"],0,2],
+  ["♻️ 将牲畜粪便转化为沼气产生的主要能源气体是...",["甲烷","丙烷","丁烷","乙烷"],0,2],
+  ["♻️ 空气质量指数 (AQI) 中“非常不健康”的数值范围是...",["201 - 300","0 - 50","51 - 100","101 - 150"],0,2],
+  ["🌳 第一个强调全球环境教育的国际宣言是...",["第比利斯宣言 (1977)","京都议定书","巴黎协定","拉姆萨尔公约"],0,2]
+ ],
+ ja: [
+  ["♻️ プラスチックごみは何色のゴミ箱に捨てるべきですか？",["黄色","緑","赤","青"],0,0],
+  ["♻️ 校庭の落ち葉はどの種類のゴミに分類されますか？",["燃えるゴミ（有機物）","燃えないゴミ（無機物）","有害ゴミ","残留ゴミ"],0,0],
+  ["🌳 学校に木を植える主な目的は...",["空気を涼しくきれいにする","校庭を汚す","蚊を増やす","古い木を切る"],0,0],
+  ["♻️ エコスクール（Adiwiyata）プログラムの目的は...",["環境に配慮する学校づくり","学費を高くする","生徒を罰する","授業時間を減らす"],0,0],
+  ["♻️ 使用済みのガラスのシロップ瓶は何ゴミですか？",["無機物ゴミ","有機物ゴミ","有害ゴミ","生ゴミ"],0,0],
+  ["♻️ 環境保護の「3R」とは何の略ですか？",["Reduce, Reuse, Recycle","Read, Write, Run","Repair, Restore, Rent","Reduce, Remake, Role"],0,0],
+  ["♻️ 空きボトルを植木鉢として再利用することを何と呼びますか？",["リユース (Reuse)","リデュース (Reduce)","リサイクル (Recycle)","リプレイス (Replace)"],0,0],
+  ["🌳 有機物ゴミ（生ゴミや落ち葉）は何に加工するのに適していますか？",["堆肥（コンポスト）","プラスチック","紙","ガラス"],0,0],
+  ["♻️ 家からマイボトルを持参することはどの行動にあたりますか？",["リデュース (Reduce)","リユース (Reuse)","リサイクル (Recycle)","レジデュー (Residu)"],0,0],
+  ["♻️ 緑色のゴミ箱は主に何を入れるためのものですか？",["有機物ゴミ","有害ゴミ","紙類","プラスチック"],0,0],
+  ["🌳 世界環境デーは毎年いつですか？",["6月5日","4月21日","8月17日","5月2日"],0,0],
+  ["♻️ 側溝にゴミをポイ捨てすると何を引き起こす可能性がありますか？",["洪水","新鮮な空気","魚の繁殖","植物の成長"],0,0],
+  ["♻️ 古紙は何にリサイクルできますか？",["新しい紙 / 段ボール","プラスチック","ガラス","葉っぱ"],0,0],
+  ["🌳 吊り鉢で植物を育てることの利点は...",["狭いスペースの緑化","蚊を増やす","道をふさぐ","屋根を壊す"],0,0],
+  ["🌳 お米のとぎ汁はどうするのが良いですか？",["植物の水やりに使う","道路に捨てる","飲む","沸騰させる"],0,0],
+  ["♻️ 腐りやすく分解されやすいゴミを何と呼びますか？",["有機物ゴミ","無機物ゴミ","有害ゴミ","乾燥ゴミ"],0,0],
+  ["♻️ 無機物ゴミの例はどれですか？",["プラスチックと空き缶","食べ残し","枯れ葉","バナナの皮"],0,0],
+  ["🌳 教室の清潔さを保つのは誰の責任ですか？",["クラス全員","先生だけ","清掃員だけ","校長先生"],0,0],
+  ["🌳 教室内にサンスベリア（観葉植物）を置くと何に役立ちますか？",["空気汚染物質の吸収","果物の収穫","トゲのある飾り","ホコリを増やす"],0,0],
+  ["♻️ 学校で節水するためにできることは...",["使用後に蛇口をしっかり閉める","蛇口から水を垂れ流しにする","水遊びをする","道路に水をまく"],0,0],
+  ["♻️ 次のうち、有害・有毒ゴミ（B3）に含まれるものはどれですか？",["使用済み乾電池","コピー用紙","ペットボトル","リンゴの芯"],0,1],
+  ["🌳 酸素のない状態で有機物ゴミが分解されると何のガスが発生しますか？",["メタンガス","酸素","二酸化炭素","窒素"],0,1],
+  ["♻️ エコスクールの指標の一つは何があることですか？",["環境に配慮した学校方針","5階建ての校舎","人工芝のグラウンド","全教室のエアコン"],0,1],
+  ["🌳 ミミズの力を借りて堆肥を作る方法を何と呼びますか？",["バーミコンポスト","タカクラ方式","バイオポア","嫌気性発酵"],0,1],
+  ["🌳 バイオポア（浸透穴）の主な機能は何ですか？",["雨水を地中に浸透させる","プラスチックを捨てる","虫を捕まえる","動物の死骸を埋める"],0,1],
+  ["♻️ 自然の温室効果の本来の働きは何ですか？",["地球の温度を暖かく保つ","オゾン層に穴を開ける","すべての氷を溶かす","嵐を起こす"],0,1],
+  ["♻️ 詰め替え可能なパッケージの製品を買うことは何の実践例ですか？",["リデュース (Reduce)","リユース (Reuse)","リサイクル (Recycle)","リプレイス (Replace)"],0,1],
+  ["♻️ リサイクルが難しい残留ゴミはどう処理すべきですか？",["最終処分場（埋立地）へ送る","校庭で燃やす","井戸の近くに埋める","海に捨てる"],0,1],
+  ["🌳 インドネシアの2月21日「ゴミ問題啓発の日」は何の悲劇を記憶するためですか？",["Leuwigajah処分場の崩落事故","アチェ津波","ジャカルタ洪水","メラピ山の噴火"],0,1],
+  ["♻️ 古紙をパルプに戻して再び紙に再生することを何と呼びますか？",["リサイクル (Recycle)","リデュース (Reduce)","リユース (Reuse)","リペア (Repair)"],0,1],
+  ["♻️ 学校での省エネにつながる行動はどれですか？",["カーテンを開けて自然光を取り入れる","昼間に電気をつける","パソコンをつけっぱなしにする","雨の日に扇風機を使う"],0,1],
+  ["🌳 学校の生態系における生物的要素に含まれるものは？",["先生、生徒、植物","校舎と机","空気と水","日光と土"],0,1],
+  ["🌳 学校に多様な種類の植物を植える目的は何を守るためですか？",["生物多様性","学校の威信","生徒の忙しさ","土地の価格"],0,1],
+  ["🌳 つる성植物（グリーンカーテン）は何に効果的ですか？",["壁の温度上昇を抑える","壁のペンキを剥がす","クモの巣を作る","窓をふさぐ"],0,1],
+  ["♻️ 次のうち、学校のゴミ管理の工夫として誤っているものは？",["校庭でゴミを燃やす","ゴミ銀行を作る","エコ酵素を作る","ペットボトルでエコブリックを作る"],0,1],
+  ["♻️ エアコンや冷蔵庫に使われていたフロンガス（CFC）は何を引き起こしますか？",["オゾン層の破壊","酸性雨","富栄養化","地震"],0,1],
+  ["🌳 学校の傾斜地で土壌浸食を防ぐための対策は？",["段々畑（テラシング）を作り植樹する","全面をセメントで固める","土を掘り返す","木を伐採する"],0,1],
+  ["♻️ 電子ゴミ（E-waste）が危険なのは何を含んでいるからですか？",["有毒な重金属","酸素ガス","栄養のあるミネラル","ビタミンC"],0,1],
+  ["♻️ レジ袋を避けてマイバッグ（布袋）を使うことは何にあたりますか？",["リデュース (Reduce)","リサイクル (Recycle)","リプレイス (Replace)","リプラント (Replant)"],0,1],
+  ["🌳 エコ酵素（Eco-enzyme）は何を発酵させて作りますか？",["果物や野菜のくず、黒糖、水","プラスチックと酵母","枯れ葉と塩","肉と酢"],0,1],
+  ["♻️ インドネシアのエコスクール計画はどの省庁によって管轄されていますか？",["環境林業省","保健省","財務省","国防省"],0,2],
+  ["♻️ 廃棄物管理における循環型経済（サーキュラーエコノミー）の原則は？",["製品の価値を可能な限り長く保つ","一度使ったら捨てる","残留物を燃やす","ゴミを輸入する"],0,2],
+  ["🌳 独立エコスクール賞（Adiwiyata Mandiri）はどのような学校に授与されますか？",["他校をエコスクールへと指導・育成した学校","新しい校舎を持つ学校","試験合格率100%の学校","最大の補助金を得た学校"],0,2],
+  ["♻️ ゴミ埋立地での分解から発生する最も主要な温室効果ガスは？",["メタン (CH4)","一酸化炭素 (CO)","二酸化硫黄 (SO2)","クロロフルオロカーボン (CFC)"],0,2],
+  ["🌳 タカクラ式コンポスト法はどの原理を利用していますか？",["微生物による好気性発酵","高温焼却","嫌気性埋立","合成化学反応"],0,2],
+  ["♻️ 酸性雨は何の汚染物質の高濃度によって引き起こされますか？",["SO2 と NOx","O2 と H2O","N2 と O3","CO2 と CH4"],0,2],
+  ["🌳 水中の有機汚濁レベルを測定する指標は何と呼ばれますか？",["BOD と COD","pH と水温","塩分濃度と濁度","最大溶存酸素量"],0,2],
+  ["🌳 ファイトレメディエーションとは何を使って汚染環境を修復する技術ですか？",["特定の植物","化学バクテリア","空気清浄機","原子炉"],0,2],
+  ["♻️ 拡大生産者責任（EPR）政策が求めていることは？",["生産者が容器包装廃棄物に責任を持つ","消費者が買い物をやめる","政府が全費用を負担する","廃品回収業者がプラを集める"],0,2],
+  ["♻️ ポリエチレンテレフタレート（PET）プラスチックは主に何に使われますか？",["透明なミネラルウォーターのボトル","PVC水道管","食品用発泡スチロール","黒いビニール袋"],0,2],
+  ["🌳 学校周辺の水域での富栄養化は何の排出によって引き起こされますか？",["リン酸塩を多く含む洗剤排水","枯れ葉や木片","きれいな雨水","古紙"],0,2],
+  ["🌳 土壌中の重金属を吸収するために推奨される植物はどれですか？",["ベチバー（イネ科植物）","稲","トウモロコシ","バラ"],0,2],
+  ["♻️ エコ酵素作りを成功させるための主な条件は何ですか？",["密閉された嫌気性（無酸素）状態","直射日光に当てる","開放された空気","1時間ごとに混ぜる"],0,2],
+  ["🌳 エコスクールのカリキュラム構造において、環境教育の統合は何と呼ばれますか？",["統合型環境教育","必須追加科目","スポーツ部","全国環境試験"],0,2],
+  ["♻️ 学校のカーボンフットプリントを大幅に削減する最も効果的な行動は？",["太陽光パネルと電力効率化","制服の頻繁な変更","新しいPCの継続購入","毎月の壁の塗り替え"],0,2],
+  ["♻️ マイクロプラスチックとはどのくらいの大きさのプラスチック粒子を指しますか？",["5 mm 未満","5 cm 以上","1〜2 メートル","電子顕微鏡でのみ見える"],0,2],
+  ["🌳 浸透井戸の維持管理はエコスクールのどの要素に含まれますか？",["環境に配慮した支援施設の管理","統合カリキュラム","学校方針","教育予算"],0,2],
+  ["♻️ 家畜の糞尿をバイオガスに変換すると得られる主なエネルギーガスは？",["メタン","プロパン","ブタン","エタン"],0,2],
+  ["♻️ 大気質指数（AQI）で「非常に健康に良くない」とされる数値範囲は？",["201 - 300","0 - 50","51 - 100","101 - 150"],0,2],
+  ["🌳 世界の環境教育の重要性を初めて強調した国際宣言はどれですか？",["トビリシ宣言 (1977)","京都議定書","パリ協定","ラムサール条約"],0,2]
+ ],
+ ko: [
+  ["♻️ 플라스틱 쓰레기는 어떤 색깔의 쓰레기통에 버려야 할까요?",["노란색","초록색","빨간색","파란색"],0,0],
+  ["♻️ 학교 운동장에 떨어진 낙엽은 어떤 종류의 쓰레기인가요?",["유기성 쓰레기","무기성 쓰레기","유해 폐기물 (B3)","잔류 폐기물"],0,0],
+  ["🌳 학교에 나무를 심는 주된 목적은...",["공기를 시원하고 맑게 하기 위해","운동장을 더럽히기 위해","모기를 늘리기 위해","오래된 나무를 베기 위해"],0,0],
+  ["♻️ 에코스쿨(Adiwiyata) 프로그램의 목적은...",["환경을 생각하는 학교 만들기","학비를 비싸게 만들기","학생 처벌하기","수업 시간 줄이기"],0,0],
+  ["♻️ 다 쓴 유리 시럽 병은 어떤 쓰레기에 속하나요?",["무기성 쓰레기","유기성 쓰레기","유해 폐기물","젖은 쓰레기"],0,0],
+  ["♻️ 환경 보호 3R은 무엇의 약자인가요?",["Reduce, Reuse, Recycle (절약, 재사용, 재활용)","Read, Write, Run","Repair, Restore, Rent","Reduce, Remake, Role"],0,0],
+  ["♻️ 빈 병을 화분으로 다시 사용하는 것을 무엇이라고 하나요?",["재사용 (Reuse)","절약 (Reduce)","재활용 (Recycle)","대체 (Replace)"],0,0],
+  ["🌳 유기성 쓰레기는 무엇으로 가공하면 가장 좋을까요?",["퇴비 (Compost)","플라스틱","종이","유리"],0,0],
+  ["♻️ 집에서 개인 물병(텀블러)을 가져오는 행동은?",["절약 (Reduce)","재사용 (Reuse)","재활용 (Recycle)","잔류물 (Residu)"],0,0],
+  ["♻️ 초록색 쓰레기통은 주로 무엇을 버리는 곳인가요?",["유기성 쓰레기","유해 폐기물","종이","플라스틱"],0,0],
+  ["🌳 세계 환경의 날은 매년 며칠인가요?",["6월 5일","4월 21일","8월 17일","5월 2일"],0,0],
+  ["♻️ 배수로에 쓰레기를 함부로 버리면 어떤 일이 발생할까요?",["홍수","상쾌한 공기","물고기 번식","식물 성장"],0,0],
+  ["♻️ 폐지는 무엇으로 재활용될 수 있나요?",["새 종이 / 판지","플라스틱","유리","나뭇잎"],0,0],
+  ["🌳 걸이 화분에 식물을 심으면 어떤 점이 좋을까요?",["좁은 공간의 녹화","모기 증가","길 막기","지붕 파손"],0,0],
+  ["🌳 쌀뜨물은 어떻게 활용하는 것이 가장 좋을까요?",["식물에 물주기","길거리에 버리기","마시기","끓이기"],0,0],
+  ["♻️ 쉽게 썩고 분해되는 쓰레기를 무엇이라고 하나요?",["유기성 쓰레기","무기성 쓰레기","유해 폐기물","건조 쓰레기"],0,0],
+  ["♻️ 무기성 쓰레기의 예시로 알맞은 것은?",["플라스틱과 캔","음식물 쓰레기","마른 나뭇잎","바나나 껍질"],0,0],
+  ["🌳 교실 청결은 누구의 책임인가요?",["학급 구성원 모두","선생님만","청소부만","교장 선생님"],0,0],
+  ["🌳 교실 안에 산세베리아 식물을 두면 어떤 효과가 있나요?",["공기 오염 물질 흡수","과일 생산","가시 장식","먼지 증가"],0,0],
+  ["♻️ 학교에서 물을 절약하는 올바른 방법은?",["사용 후 수도꼭지 잠그기","수도꼭지에서 물이 새게 두기","물장난하기","도로에 물 뿌리기"],0,0],
+  ["♻️ 다음 중 유해 및 독성 폐기물(B3)에 해당하는 것은?",["폐건전지","복사 용지","플라스틱 병","사과 심"],0,1],
+  ["🌳 산소 없이 유기성 쓰레기가 분해될 때 발생하는 가스는?",["메탄","산소","이산화탄소","질소"],0,1],
+  ["♻️ 에코스쿨의 주요 지표 중 하나는 무엇이 있는 것인가요?",["환경 친화적인 학교 정책","5층 건물","인조 잔디 운동장","모든 교실의 에어컨"],0,1],
+  ["🌳 지렁이의 도움을 받아 퇴비를 만드는 방법을 무엇이라 하나요?",["지렁이 퇴비 (Vermicompost)","타카쿠라 방식","바이오포어","혐기성 발효"],0,1],
+  ["🌳 바이오포어(빗물 침투 구멍)의 주요 기능은?",["빗물을 땅속으로 흡수시키기","플라스틱 버리기","곤충 잡기","동물 사체 묻기"],0,1],
+  ["♻️ 자연적인 온실 효과의 본래 기능은?",["지구 온도를 따뜻하게 유지","오존층 파괴","모든 빙하 녹이기","폭풍 만들기"],0,1],
+  ["♻️ 리필 가능한 포장 제품을 구매하는 것은 어떤 실천인가요?",["절약 (Reduce)","재사용 (Reuse)","재활용 (Recycle)","대체 (Replace)"],0,1],
+  ["♻️ 재활용이 어려운 잔류 폐기물은 어떻게 처리해야 하나요?",["매립지(TPA)로 보내기","운동장에서 태우기","우물 근처에 묻기","바다에 버리기"],0,1],
+  ["🌳 인도네시아의 2월 21일 '국가 쓰레기 인식의 날'은 어떤 비극을 기리기 위한 것인가요?",["Leuwigajah 매립지 산사태","아체 쓰나미","자카르타 홍수","메라피 화산 폭발"],0,1],
+  ["♻️ 폐지를 펄프로 만들어 다시 종이로 찍어내는 과정을 무엇이라 하나요?",["재활용 (Recycle)","절약 (Reduce)","재사용 (Reuse)","수리 (Repair)"],0,1],
+  ["♻️ 학교에서 에너지를 절약하는 방법은?",["커튼을 열어 자연광 이용하기","낮에 전등 켜두기","컴퓨터 켜둔 채로 두기","비 올 때 선풍기 켜기"],0,1],
+  ["🌳 학교 생태계의 생물적 요소에 포함되는 것은?",["교사, 학생, 식물","건물과 책상","공기와 물","햇빛과 흙"],0,1],
+  ["🌳 학교에 다양한 종류의 식물을 심는 목적은 무엇을 지키기 위함인가요?",["생물 다양성","학교의 명성","학생들의 바쁨","땅값"],0,1],
+  ["🌳 덩굴 식물(수직 정원)은 어떤 효과가 있나요?",["벽면의 열기 온도 감소","벽 페인트 손상","거미집 생성","창문 가리기"],0,1],
+  ["♻️ 다음 중 학교 쓰레기 관리 혁신이 아닌 것은?",["운동장에서 쓰레기 소각하기","쓰레기 은행 만들기","친환경 효소(에코엔자임) 만들기","페트병으로 에코브릭 만들기"],0,1],
+  ["♻️ 에어컨과 냉장고에 많이 쓰였던 프레온 가스(CFC)가 유발하는 현상은?",["오존층 파괴","산성비","부영양화","지진"],0,1],
+  ["🌳 경사진 학교 부지의 토양 침식을 막기 위한 노력은?",["계단식 단(테라스) 조성 및 나무 심기","전체 구역 시멘트 포장","땅 파기","나무 베기"],0,1],
+  ["♻️ 전자 폐기물(e-waste)이 위험한 이유는 무엇을 포함하고 있기 때문인가요?",["유독성 중금속","산소 가스","영양 미네랄","비타민 C"],0,1],
+  ["♻️ 비닐봉투 대신 천 가방(에코백)을 사용하는 행동은?",["절약 (Reduce)","재활용 (Recycle)","대체 (Replace)","다시 심기 (Replant)"],0,1],
+  ["🌳 에코엔자임(친환경 효소)은 무엇을 발효시켜 만드나요?",["과일/채소 자투리, 흑설탕, 물","플라스틱과 효모","마른 잎과 소금","고기와 식초"],0,1],
+  ["♻️ 인도네시아 에코스쿨 프로그램은 어느 정부 부처에서 주관하나요?",["환경산림부","보건부","재무부","국방부"],0,2],
+  ["♻️ 폐기물 관리의 순환 경제에서 가장 핵심적인 원칙은?",["제품의 가치를 가능한 한 오래 유지하기","한 번 쓰고 버리기","잔류물 소각하기","쓰레기 수입하기"],0,2],
+  ["🌳 자립 에코스쿨 상(Adiwiyata Mandiri)은 어떤 학교에 수여되나요?",["다른 학교를 에코스쿨로 지도·육성한 학교","새 건물이 있는 학교","시험 합격률 100% 학교","가장 많은 지원금을 받은 학교"],0,2],
+  ["♻️ 매립지 쓰레기 분해 과정에서 가장 많이 발생하는 온실가스는?",["메탄 (CH4)","일산화탄소 (CO)","이산화황 (SO2)","염화불화탄소 (CFC)"],0,2],
+  ["🌳 타카쿠라(Takakura) 퇴비화 방식이 사용하는 원리는?",["미생물의 호기성 발효","고온 소각","혐기성 매립","합성 화학 반응"],0,2],
+  ["♻️ 산성비는 어떤 오염 물질의 농도가 높을 때 발생하나요?",["SO2 및 NOx","O2 및 H2O","N2 및 O3","CO2 및 CH4"],0,2],
+  ["🌳 물속의 유기물 오염도를 측정하는 지표는?",["BOD 및 COD","pH 및 온도","염도 및 탁도","최대 용존 산소량"],0,2],
+  ["🌳 식물환경복원(Phytoremediation)은 무엇을 이용해 오염된 환경을 정화하는 것인가요?",["특정 식물","화학 박테리아","공기 정화기","원자로"],0,2],
+  ["♻️ 생산자책임재활용제도(EPR)가 요구하는 사항은?",["생산자가 제품 포장 폐기물에 책임을 짐","소비자가 쇼핑을 중단함","정부가 모든 비용을 부담함","수거인이 플라스틱을 모음"],0,2],
+  ["♻️ 폴리에틸렌 테레프탈레이트(PET) 플라스틱은 주로 어디에 쓰이나요?",["투명한 생수병","PVC 수도관","식품용 스티로폼","검은색 비닐봉투"],0,2],
+  ["🌳 학교 주변 수역의 부영양화는 무엇을 배출할 때 유발될 수 있나요?",["인산염이 풍부한 세제 폐수","마른 나뭇잎과 나무","깨끗한 빗물","폐지"],0,2],
+  ["🌳 토양의 중금속을 흡수하는 데 권장되는 식물은?",["베티버 뿌리 (Vetiver)","벼","옥수수","장미"],0,2],
+  ["♻️ 에코엔자임 제작을 성공시키기 위한 가장 중요한 조건은?",["밀폐된 혐기성(무산소) 상태","직사광선 노출","개방된 공기","1시간마다 저어주기"],0,2],
+  ["🌳 에코스쿨 교육과정에서 환경 교육의 통합을 무엇이라 부르나요?",["통합 환경 교육","필수 추가 과목","스포츠 동아리","국가 환경 시험"],0,2],
+  ["♻️ 학교의 탄소 발자국을 줄이기 위해 가장 효과적인 조치는?",["태양광 패널 설치 및 전기 효율화","주기적인 교복 교체","새 컴퓨터 지속 구매","매달 벽 페인트칠"],0,2],
+  ["♻️ 환경 위협이 되는 미세플라스틱의 크기는 보통 얼마인가요?",["5 mm 미만","5 cm 이상","1~2 미터","전자 현미경으로만 보임"],0,2],
+  ["🌳 빗물 침투 우물을 관리하는 활동은 에코스쿨의 어떤 구성 요소에 속하나요?",["친환경 지원 시설 관리","통합 교육과정","학교 정책","교육 예산"],0,2],
+  ["♻️ 가축 분뇨를 바이오가스로 전환할 때 생성되는 주요 에너지 가스는?",["메탄","프로판","부탄","에탄"],0,2],
+  ["♻️ 대기질 지수(AQI)에서 '매우 나쁨(매우 건강에 해로움)' 단계의 수치는?",["201 - 300","0 - 50","51 - 100","101 - 150"],0,2],
+  ["🌳 글로벌 환경 교육의 중요성을 최초로 강조한 국제 선언은?",["트빌리시 선언 (1977)","교토 의정서","파리 협정","람사르 협약"],0,2]
+ ],
+ ar: [
+  ["♻️ يجب رمي النفايات البلاستيكية في سلة المهملات ذات اللون...",["الأصفر","الأخضر","الأحمر","الأزرق"],0,0],
+  ["♻️ الأوراق المتساقطة في ساحة المدرسة تعتبر من النفايات...",["العضوية","غير العضوية","الخطرة (B3)","المتبقية"],0,0],
+  ["🌳 الهدف الرئيسي من زراعة الأشجار في المدرسة هو...",["تبريد وتنقية الهواء","تلويث الساحة","زيادة البعوض","قطع الأشجار القديمة"],0,0],
+  ["♻️ يهدف برنامج المدرسة البيئية (Adiwiyata) إلى...",["إنشاء مدرسة تهتم بالبيئة","جعل المدرسة باهظة الثمن","معاقبة الطلاب","تقليل ساعات الدراسة"],0,0],
+  ["♻️ زجاجات العصير الفارغة المصنوعة من الزجاج تعتبر نفايات...",["غير عضوية","عضوية","خطرة","رطبة"],0,0],
+  ["♻️ إلى ماذا يرمز اختصار 3R البيئي؟",["تقليل، إعادة استخدام، إعادة تدوير","قراءة، كتابة، جري","إصلاح، استعادة، إيجار","تقليل، إعادة صنع، دور"],0,0],
+  ["♻️ إعادة استخدام الزجاجات الفارغة كأصص للنباتات يسمى...",["إعادة الاستخدام (Reuse)","التقليل (Reduce)","إعادة التدوير (Recycle)","الاستبدال (Replace)"],0,0],
+  ["🌳 النفايات العضوية ممتازة جداً لتحويلها إلى...",["سماد عضوي (كومبوست)","بلاستيك","ورق","زجاج"],0,0],
+  ["♻️ إحضار زجاجة ماء خاصة من المنزل يعتبر عملاً من أعمال...",["التقليل (Reduce)","إعادة الاستخدام (Reuse)","إعادة التدوير (Recycle)","البقايا (Residu)"],0,0],
+  ["♻️ سلة المهملات الخضراء مخصصة لـ...",["النفايات العضوية","النفايات الخطرة","الورق","البلاستيك"],0,0],
+  ["🌳 يتم الاحتفال بيوم البيئة العالمي كل عام في تاريخ...",["5 يونيو","21 أبريل","17 أغسطس","2 مايو"],0,0],
+  ["♻️ رمي القمامة عشوائياً في قنوات الصرف قد يسبب...",["الفيضانات","هواءً نقياً","تكاثر الأسماك","نمو النباتات"],0,0],
+  ["♻️ يمكن إعادة تدوير الورق المستعمل ليصبح...",["ورقاً جديداً / كرتون","بلاستيك","زجاج","أوراق شجر"],0,0],
+  ["🌳 زراعة النباتات في أصص معلقة مفيدة لـ...",["تخضير المساحات الضيقة","زيادة البعوض","إعاقة الطريق","إتلاف السقف"],0,0],
+  ["🌳 ماء غسيل الأرز من الأفضل أن...",["يُسقى به النبات","يُسكب في الشارع","يُشرب","يُغلى"],0,0],
+  ["♻️ النفايات التي تتحلل وتتعفن بسهولة تسمى...",["عضوية","غير عضوية","خطرة","جافة"],0,0],
+  ["♻️ من أمثلة النفايات غير العضوية...",["البلاستيك والعلب المعدنية","بقايا الطعام","الأوراق الجافة","قشور الموز"],0,0],
+  ["🌳 نظافة الفصل الدراسي هي مسؤولية...",["جميع طلاب ومعلمي الفصل","المعلمين فقط","عمال النظافة فقط","مدير المدرسة"],0,0],
+  ["🌳 نبات جلد النمر (Sansevieria) داخل الفصل مفيد لـ...",["امتصاص تلوث الهواء","إنتاج الفاكهة","زينة شائكة","زيادة الغبار"],0,0],
+  ["♻️ يمكن توفير المياه في المدرسة عن طريق...",["إغلاق الصنبور بعد الاستخدام","ترك الصنبور يقطر","اللعب بالماء","رش الشارع"],0,0],
+  ["♻️ أي مما يلي يعتبر من النفايات الخطرة والسامة (B3)؟",["البطاريات المستعملة","ورق الطباعة","الزجاجات البلاستيكية","بقايا التفاح"],0,1],
+  ["🌳 عملية تحلل النفايات العضوية بدون أكسجين تنتج غاز...",["الميثان","الأكسجين","ثاني أكسيد الكربون","النيتروجين"],0,1],
+  ["♻️ أحد مؤشرات المدرسة البيئية هو وجود...",["سياسات مدرسية صديقة للبيئة","مبنى من 5 طوابق","ملعب عشب صناعي","مكيف في كل فصل"],0,1],
+  ["🌳 صنع السماد العضوي بمساعدة الديدان يسمى...",["سماد الديدان (Vermicompost)","تاكاكورا","البيوبوري","اللاهوائي"],0,1],
+  ["🌳 الوظيفة الرئيسية لفتحات التصريف الحيوية (Biopori) هي...",["تصريف مياه الأمطار في التربة","رمي البلاستيك","اصطياد الحشرات","دفن الحيوانات النافقة"],0,1],
+  ["♻️ يعمل الاحتباس الحراري الطبيعي على...",["تدفئة درجة حرارة الأرض","ثقب الأوزون","إذابة كل الجليد","إحداث العواصف"],0,1],
+  ["♻️ شراء منتجات بعبوات قابلة لإعادة التعبئة هو مثال على تطبيق...",["التقليل (Reduce)","إعادة الاستخدام (Reuse)","إعادة التدوير (Recycle)","الاستبدال (Replace)"],0,1],
+  ["♻️ النفايات المتبقية التي يصعب تدويرها يجب أن...",["تُرسل إلى مكب النفايات الصحي","تُحرق في الساحة","تُدفن قرب البئر","تُلقى في البحر"],0,1],
+  ["🌳 اليوم الوطني للتوعية بالنفايات في 21 فبراير يخلد ذكرى مأساة...",["انهيار مكب Leuwigajah","تسونامي آتشيه","فيضان جاكرتا","ثوران جبل ميرابي"],0,1],
+  ["♻️ تحويل نفايات الورق إلى عجينة ورقية وطباعتها مجدداً يسمى...",["إعادة التدوير (Recycle)","التقليل (Reduce)","إعادة الاستخدام (Reuse)","الإصلاح (Repair)"],0,1],
+  ["♻️ يمكن توفير الطاقة في المدرسة عن طريق...",["فتح الستائر للإضاءة الطبيعية","تشغيل المصابيح نهاراً","ترك الحواسيب تعمل","تشغيل المراوح أثناء المطر"],0,1],
+  ["🌳 تشمل المكونات الحية في النظام البيئي المدرسي...",["المعلمين والطلاب والنباتات","المباني والمكاتب","الهواء والماء","ضوء الشمس والتربة"],0,1],
+  ["🌳 زراعة أنواع مختلفة من النباتات في المدرسة تهدف إلى الحفاظ على...",["التنوع البيولوجي","هيبة المدرسة","انشغال الطلاب","أسعار الأراضي"],0,1],
+  ["🌳 النباتات المتسلقة (الحدائق العمودية) فعالة في...",["تقليل حرارة الجدران","إتلاف طلاء الجدران","بناء أعشاش العناكب","حجب النوافذ"],0,1],
+  ["♻️ جميع ما يلي ابتكارات لإدارة النفايات في المدرسة باستثناء...",["حرق القمامة في الملعب","إنشاء بنك للنفايات","صنع الإنزيم البيئي","تحويل الزجاجات إلى طوب بيئي"],0,1],
+  ["♻️ غازات الكلوروفلوروكربون (CFC) المستخدمة في المكيفات تسبب...",["تآكل طبقة الأوزون","الأمطار الحمضية","الإثراء الغذائي","الزلازل"],0,1],
+  ["🌳 لمنع انجراف التربة في المناطق المائلة بالمدرسة يجب...",["عمل مدرجات وزراعة الأشجار","تغطية المنطقة بالأسمنت","حفر التربة","قطع الأشجار"],0,1],
+  ["♻️ النفايات الإلكترونية (e-waste) خطيرة لأنها تحتوي على...",["معادن ثقيلة سامة","غاز الأكسجين","معادن مغذية","فيتامين C"],0,1],
+  ["♻️ استخدام الأكياس القماشية لتجنب الأكياس البلاستيكية هو إجراء...",["التقليل (Reduce)","إعادة التدوير (Recycle)","الاستبدال (Replace)","إعادة الزرع (Replant)"],0,1],
+  ["🌳 يُصنع الإنزيم البيئي (Eco-enzyme) من تخمير...",["بقايا الفواكه والخضار، السكر البني، والماء","البلاستيك والخميرة","الأوراق الجافة والملح","اللحم والخل"],0,1],
+  ["♻️ يتم تنظيم برنامج المدرسة البيئية وطنياً من قِبل وزارة...",["البيئة والغابات","الصحة","المالية","الدفاع"],0,2],
+  ["♻️ المبدأ الأساسي للاقتصاد الدائري في إدارة النفايات هو...",["الحفاظ على قيمة المنتج لأطول فترة ممكنة","التخلص منه بعد استخدام واحد","حرق البقايا","استيراد النفايات"],0,2],
+  ["🌳 تُمنح جائزة المدرسة البيئية المستقلة للمدارس التي...",["تدرّب مدارس أخرى لتصبح بيئية","تمتلك مباني جديدة","تنجح في الامتحانات بنسبة 100%","تحصل على أكبر تمويل"],0,2],
+  ["♻️ غاز الدفيئة الأكثر هيمنة الناتج عن تحلل النفايات في المكبات هو...",["الميثان (CH4)","أول أكسيد الكربون (CO)","ثاني أكسيد الكبريت (SO2)","الكلوروفلوروكربون (CFC)"],0,2],
+  ["🌳 تعتمد طريقة تاكاكورا (Takakura) لصنع السماد على مبدأ...",["التخمير الهوائي بالكائنات الدقيقة","الحرق بدرجات حرارة عالية","الدفن اللاهوائي","التفاعل الكيميائي الصناعي"],0,2],
+  ["♻️ تحدث الأمطار الحمضية بسبب التركيز العالي للملوثات...",["SO2 و NOx","O2 و H2O","N2 و O3","CO2 و CH4"],0,2],
+  ["🌳 تسمى معايير قياس مستوى التلوث العضوي في الماء بـ...",["BOD و COD","الحموضة والحرارة","الملوحة والعكارة","الأكسجين المذاب الأقصى"],0,2],
+  ["🌳 المعالجة النباتية (Phytoremediation) هي استعادة البيئة الملوثة باستخدام...",["نباتات معينة","بكتيريا كيميائية","مرشحات الهواء","مفاعلات نووية"],0,2],
+  ["♻️ تتطلب سياسة مسؤولية المنتج الممتدة (EPR) أن...",["يتحمل المنتجون مسؤولية نفايات عبواتهم","يتوقف المستهلكون عن التسوق","تتحمل الحكومة التكاليف","يجمع جامعو القمامة البلاستيك"],0,2],
+  ["♻️ يُستخدم بلاستيك البولي إيثيلين تيريفثالات (PET) عادةً في...",["زجاجات المياه المعدنية الشفافة","أنابيب المياه PVC","فلين الطعام","الأكياس البلاستيكية السوداء"],0,2],
+  ["🌳 يمكن أن يحدث الإثراء الغذائي في المياه القريبة من المدرسة بسبب تصريف...",["نفايات المنظفات الغنية بالفوسفات","الأوراق الجافة والخشب","مياه الأمطار النظيفة","الورق المستعمل"],0,2],
+  ["🌳 النبات الموصى به لامتصاص المعادن الثقيلة من التربة هو...",["نجيل الهند (Vetiver)","الأرز","الذرة","الورد"],0,2],
+  ["♻️ الشرط الأساسي لنجاح صنع الإنزيم البيئي هو توفير بيئة...",["لاهوائية مغلقة بإحكام","معرضة لأشعة الشمس المباشرة","مفتوحة للهواء","تُقلّب كل ساعة"],0,2],
+  ["🌳 في هيكل مناهج المدرسة البيئية، يُعرف دمج البيئة باسم...",["التعليم البيئي المتكامل","مادة إضافية إلزامية","نادي رياضي","الامتحان البيئي الوطني"],0,2],
+  ["♻️ لتقليل البصمة الكربونية للمدرسة بشكل كبير، فإن الإجراء الأهم هو...",["الألواح الشمسية وكفاءة الكهرباء","تغيير الزي المدرسي بانتظام","شراء حواسيب جديدة باستمرار","طلاء الجدران شهرياً"],0,2],
+  ["♻️ تشكل اللدائن الدقيقة (Microplastics) تهديداً بيئياً ويبلغ حجمها...",["أقل من 5 ملم","أكثر من 5 سم","1-2 متر","تُرى فقط بالمجهر الإلكتروني"],0,2],
+  ["🌳 تدخل صيانة آبار التصريف ضمن مكون المدرسة البيئية...",["إدارة المرافق الداعمة الصديقة للبيئة","المنهج المتكامل","سياسة المدرسة","ميزانية التعليم"],0,2],
+  ["♻️ تحويل روث الماشية إلى غاز حيوي ينتج طاقة رئيسية على شكل غاز...",["الميثان","البروبان","البوتان","الإيثان"],0,2],
+  ["♻️ مؤشر جودة الهواء (AQI) لمستوى 'غير صحي للغاية' يقع بين...",["201 - 300","0 - 50","51 - 100","101 - 150"],0,2],
+  ["🌳 أول إعلان دولي سلّط الضوء على التعليم البيئي العالمي هو...",["إعلان تبليسي (1977)","بروتوكول كيوتو","اتفاقية باريس","اتفاقية رامسار"],0,2]
+ ]
+};
+
+const getBank = (lang) => (RAW_BANK[lang] || RAW_BANK.id).map((a, idx) => ({q:a[0], o:a[1], a:a[2], diff:a[3], idx}));
+let BANK_ADIWIYATA = getBank('id');
+
+let Q = JSON.parse(JSON.stringify(BANK_ADIWIYATA.slice(0, 20))), S = {timer:20, lives:5, shuffle:1};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function show(id){ document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on')); if(id) $(id).classList.add('on'); }
+function save(){ try{ localStorage.setItem('ecowinsky', JSON.stringify({Q,S})); }catch(e){} }
+function load(){ try{ const d = JSON.parse(localStorage.getItem('ecowinsky')||'null'); if(d&&d.Q&&d.Q.length){Q=d.Q;S=d.S||S;} }catch(e){} }
+function enc(){ return btoa(unescape(encodeURIComponent(JSON.stringify({Q,S})))); }
+function dec(s){ return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+
+function customAlert(msg) {
+    const a = document.createElement('div');
+    a.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--bad);color:#fff;padding:12px 24px;border-radius:12px;z-index:9999;box-shadow:0 4px 12px #0008;font-weight:bold;';
+    a.textContent = msg;
+    document.body.appendChild(a);
+    setTimeout(() => { a.style.opacity = '0'; a.style.transition = 'opacity 0.3s'; setTimeout(()=>a.remove(), 300); }, 3000);
+}
+load();
+try{ if(location.hash.indexOf('#d=')===0){ const d=dec(location.hash.slice(3)); if(d.Q&&d.Q.length){Q=d.Q;S=d.S||S; $('src').textContent='📚 Soal dari guru dimuat ('+Q.length+' soal)';} } }catch(e){}
+async function copy(t, el){ try{ await navigator.clipboard.writeText(t); return true; }catch(e){ if(el){el.focus();el.select();try{return document.execCommand('copy');}catch(_){}} return false; } }
+
+let AC=null, muted=false;
+function beep(f,d,type,vol,when){ if(muted||!AC) return; try{ const o=AC.createOscillator(),g=AC.createGain(); o.type=type||'sine'; o.frequency.value=f; const t=AC.currentTime+(when||0); g.gain.setValueAtTime(vol||.15,t); g.gain.exponentialRampToValueAtTime(.001,t+d); o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d);}catch(e){} }
+const sndOk=()=>{beep(660,.15,'triangle');beep(880,.15,'triangle',.15,.12);beep(1320,.25,'triangle',.15,.24)};
+const sndBad=()=>{beep(180,.35,'sawtooth',.18);beep(120,.4,'sawtooth',.18,.15)};
+const sndThunder=()=>{beep(60,.8,'sawtooth',.25);beep(40,1.2,'sawtooth',.2,.3)};
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊'};
+
+const cv=$('c');
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x38b6ff); scene.fog=new THREE.Fog(0x38b6ff,200,900);
+const cam=new THREE.PerspectiveCamera(60,1,.1,1500); 
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0x555555, 0.8);
+scene.add(hemi);
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+sun.target.position.set(0, 0, -110);
+scene.add(sun.target);
+sun.castShadow = true;
+const sD = 400;
+sun.shadow.camera.left = -sD;
+sun.shadow.camera.right = sD;
+sun.shadow.camera.top = sD;
+sun.shadow.camera.bottom = -sD;
+sun.shadow.camera.near = 10;
+sun.shadow.camera.far = 1000;
+sun.shadow.mapSize.width = 1024;
+sun.shadow.mapSize.height = 1024;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+let baseFov=60;
+function resize(){ const w=innerWidth,h=innerHeight; renderer.setSize(w,h,false); cam.aspect=w/h; baseFov=w<h?75:60; cam.fov=baseFov; cam.updateProjectionMatrix(); }
+addEventListener('resize',resize); resize();
+
+const M=(c,o)=>new THREE.MeshLambertMaterial(Object.assign({color:c,flatShading:true},o||{}));
+const plane=new THREE.Group(), pr=new THREE.Group(); plane.add(pr); plane.fans=[]; plane.glows=[];
+(function(){ 
+ const P=(c,sp,sh,o)=>new THREE.MeshPhongMaterial(Object.assign({color:c,specular:sp,shininess:sh},o||{}));
+ const white=P(0xf4f7fb,0xaaaaaa,70,{side:THREE.DoubleSide}), blue=P(0x1a4fd1,0x6688ff,60), dark=P(0x1b2230,0x445566,40,{side:THREE.DoubleSide}), metal=P(0x9aa4b2,0xffffff,90,{side:THREE.DoubleSide}), glass=P(0x0a1830,0xffffff,120,{emissive:0x04080f});
+ const BX=new THREE.BoxGeometry(1,1,1), SP=new THREE.SphereGeometry(1,12,8);
+ const mesh=(g,m,x,y,z)=>{ const o=new THREE.Mesh(g,m); o.castShadow=true; o.receiveShadow=true; o.position.set(x,y,z); pr.add(o); return o; };
+ const prof=[[0,-3.4],[.18,-3.3],[.38,-3.05],[.55,-2.6],[.66,-2.0],[.72,-1.2],[.74,0],[.74,1.2],[.70,2.0],[.58,2.7],[.40,3.2],[.22,3.5],[0,3.6]].map(a=>new THREE.Vector2(a[0],a[1]));
+ mesh(new THREE.LatheGeometry(prof,28),white,0,0,0).rotation.x=Math.PI/2;
+ mesh(SP,dark,0,0,-3.3).scale.set(.2,.2,.3);
+ const ws=mesh(BX,glass,0,.56,-2.3); ws.scale.set(.66,.14,.55); ws.rotation.x=-.5;
+ [-1,1].forEach(sg=>{
+  mesh(BX,blue,sg*.735,-.02,.1).scale.set(.03,.09,4.2);
+  for(let i=0;i<13;i++) mesh(BX,dark,sg*.725,.24,-1.7+i*.27).scale.set(.03,.12,.15);
+  const sw=mesh(BX,glass,sg*.6,.42,-2.45); sw.scale.set(.03,.13,.3);
+ });
+ const flat=(pts,th)=>{ const sh=new THREE.Shape(); sh.moveTo(pts[0][0],pts[0][1]); for(let i=1;i<pts.length;i++) sh.lineTo(pts[i][0],pts[i][1]); const g=new THREE.ExtrudeGeometry(sh,{depth:th,bevelEnabled:true,bevelThickness:.012,bevelSize:.012,bevelSegments:1}); g.rotateX(-Math.PI/2); g.translate(0,-th/2,0); return g; };
+ const pair=(pts,th,y,rz,mat)=>[1,-1].forEach(sg=>{ const m=new THREE.Mesh(flat(pts,th),mat); m.castShadow=true; m.receiveShadow=true; m.position.y=y; m.rotation.z=sg*rz; m.scale.x=sg; pr.add(m); });
+ pair([[.5,.2],[3.2,-1.3],[3.2,-2.0],[.5,-1.4]],.1,-.28,.05,white);
+ pair([[.3,-2.35],[1.9,-3.0],[1.9,-3.4],[.3,-3.35]],.07,.15,.03,white);
+ pair([[.55,-.25],[3.18,-1.3],[3.18,-1.45],[.55,-.4]],.11,-.28,.05,blue); 
+ const fs=new THREE.Shape(); fs.moveTo(1.5,.5); fs.lineTo(2.6,2.2); fs.lineTo(3.1,2.2); fs.lineTo(3.05,.5);
+ const fg=new THREE.ExtrudeGeometry(fs,{depth:.08,bevelEnabled:false}); fg.rotateY(-Math.PI/2); fg.translate(.04,0,0); mesh(fg,blue,0,0,0);
+ [-1,1].forEach(sg=>{ const w=mesh(BX,blue,sg*3.2,.05,1.65); w.scale.set(.05,.7,.55); w.rotation.z=-sg*.18; });
+ const glowTex=radTex(false);
+ [-1,1].forEach(sg=>{ const ex=sg*1.5;
+  mesh(BX,white,ex,-.27,-.25).scale.set(.1,.18,1.0);
+  const nac=mesh(new THREE.CylinderGeometry(.34,.30,1.6,20,1,true),metal,ex,-.62,-.3); nac.rotation.x=Math.PI/2;
+  mesh(new THREE.TorusGeometry(.33,.055,8,22),white,ex,-.62,-1.1);
+  mesh(new THREE.CircleGeometry(.31,18),dark,ex,-.62,-.85);
+  const fan=new THREE.Group(); fan.position.set(ex,-.62,-.95); pr.add(fan);
+  for(let i=0;i<8;i++){ const b=new THREE.Mesh(BX,metal); b.scale.set(.6,.05,.015); b.castShadow=true; b.receiveShadow=true; b.rotation.z=i*Math.PI/8; fan.add(b); }
+  const hub=new THREE.Mesh(SP,metal); hub.scale.set(.07,.07,.07); fan.add(hub); plane.fans.push(fan);
+  const nz=mesh(new THREE.CylinderGeometry(.21,.30,.45,18,1,true),dark,ex,-.62,.62); nz.rotation.x=Math.PI/2;
+  mesh(new THREE.CircleGeometry(.2,16),new THREE.MeshBasicMaterial({color:0xff8a30}),ex,-.62,.5);
+  const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xff9040,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false})); gl.position.set(ex,-.62,.9); gl.scale.set(.9,.9,1); pr.add(gl); plane.glows.push(gl);
+ });
+ const lt=(c,x,y,z,r)=>mesh(SP,new THREE.MeshBasicMaterial({color:c}),x,y,z).scale.set(r,r,r);
+ lt(0xff2a2a,-3.25,-.1,1.55,.07); lt(0x2aff5a,3.25,-.1,1.55,.07);
+ plane.strobe=mesh(SP,new THREE.MeshBasicMaterial({color:0xffffff}),0,2.25,3.05); plane.strobe.scale.set(.08,.08,.08);
+ pr.scale.setScalar(.58);
+})();
+scene.add(plane);
+
+const headlight = new THREE.PointLight(0xffeedd, 0, 150);
+headlight.position.set(0, 2, -4);
+plane.add(headlight);
+
+const px={x:0,y:20}, tg={x:0,y:20}; 
+
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ss=(a,b,x)=>{x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x)};
+const n1=(x,z)=>Math.sin(x*.11+Math.sin(z*.07)*2)*.5+Math.sin(z*.13+x*.05)*.35+Math.sin((x+z)*.23)*.15;
+const fbm=(x,z)=>(n1(x,z)+.5*n1(x*2.1+7,z*2.1+3)+.25*n1(x*4.3-5,z*4.3+9))/1.75;
+const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+const hx=h=>[(h>>16&255)/255,(h>>8&255)/255,(h&255)/255];
+const GY=-12;
+const sphG=new THREE.SphereGeometry(1,7,5), boxG=new THREE.BoxGeometry(1,1,1), coneG=new THREE.ConeGeometry(1,1,7), cylG=new THREE.CylinderGeometry(.2,.3,1,6), rockG=new THREE.IcosahedronGeometry(1,0);
+
+const C_GRASS=hx(0x55aa44),C_FOREST=hx(0x2d7030),C_ROCK=hx(0x8a7f72),C_SNOW=hx(0xffffff);
+function fMtn(x,z,o){ 
+ const e=ss(10,48,Math.abs(x)), r=Math.max(1-Math.abs(fbm(x*.6,z*.6)),0), h=Math.pow(r,2.2)*75*(.04+.96*e)+fbm(x,z)*1.5*e;
+ o.y=h; o.c=h<10?mix(C_GRASS,C_FOREST,ss(0,10,h)):h<26?mix(C_FOREST,C_ROCK,ss(10,26,h)):mix(C_ROCK,C_SNOW,ss(26,38,h)); o.land=h<18;
+}
+function fSea(x,z,o){ 
+ const L=fbm(x*.45,z*.45)*.6-.08, e=.15+.85*ss(8,40,Math.abs(x));
+ o.y = Math.pow(Math.max(0,L),.8)*55*e - 2; 
+ if(L<=0){ o.c=hx(0xe8d09b); o.land=false; } 
+ else { o.c=L<.05?hx(0xf5e3b5):L<.25?mix(hx(0x4cb954),hx(0x389942),ss(.05,.25,L)):hx(0x237038); o.land=L>.05&&o.y<14; }
+}
+function fCity(x,z,o){ 
+ const rx=Math.abs(((x%32)+32)%32-16), rz=Math.abs(((z%32)+32)%32-16);
+ o.y=0; o.c=(rx>13||rz>13)?hx(0x4a4e58):mix(hx(0x7da86b),hx(0x9cb882),Math.max(0,Math.min(1,fbm(x*.3,z*.3)*.5+.5))); o.land=true;
+}
+function fDes(x,z,o){ 
+ const e=.15+.85*ss(4,40,Math.abs(x)), d=fbm(x*.3,z*.3)*.5+.5, rg=1-Math.abs(Math.sin(x*.05+fbm(x*.2,z*.2)*4+z*.03));
+ o.y=(Math.pow(d,1.6)*16+rg*9)*e; o.c=mix(hx(0xf2cc85),hx(0xd49f55),ss(0,22,o.y)); o.land=true;
+}
+function fFor(x,z,o){ 
+ const e=ss(9,34,Math.abs(x)); o.y=fbm(x*.4,z*.4)*2+e*(14+fbm(x*.25+3,z*.25)*12);
+ o.c=mix(hx(0x55b244),hx(0x287532),Math.max(0,Math.min(1,ss(0,28,o.y)+fbm(x*1.3,z*1.3)*.25))); o.land=true;
+}
+function fCave(x,z,o){ 
+ const w=ss(6,22,Math.abs(x));
+ o.y=fbm(x*.5,z*.5)*1.3+w*(42+fbm(x*.3,z*.3)*12);
+ if(Math.abs(x)<8) o.y -= (8-Math.abs(x))*.4; 
+ o.c=mix(hx(0x8a755f),hx(0x3a3028),ss(0,40,o.y)); 
+ o.land=o.y>1.5 && o.y<10; 
+}
+function fFlat(x,z,o){ o.y=0; o.c=[0,0,0]; o.land=false; }
+function fWst(x,z,o){ 
+ const e=ss(14,60,Math.abs(x)), m=Math.pow(Math.max(fbm(x*.22+9,z*.22)*.5+.5,0),3)*38*e;
+ o.y=fbm(x*.5,z*.5)*1.6+m; let c=mix(hx(0x9c7f65),hx(0x7d6c5c),ss(0,30,o.y)); if(Math.abs(n1(x*1.9,z*1.9))<.09)c=mix(c,hx(0x4a3c33),.7); o.c=c; o.land=true;
+}
+function fGarden(x,z,o){ 
+ const e=ss(8,40,Math.abs(x));
+ o.y=fbm(x*.4,z*.4)*1.5+e*(3+fbm(x*.6,z*.6)*5);
+ let c=mix(hx(0x70db50),hx(0x50c038),Math.max(0,Math.min(1,fbm(x,z)*.5+.5)));
+ const nf=n1(x*3.5,z*3.5), nf2=n1(x*4.1+7,z*4.1-3);
+ if(nf>.65)c=hx(0xff6699);else if(nf<-.65)c=hx(0xffcc00);else if(nf2>.7)c=hx(0xbb66ff);else if(nf2<-.7)c=hx(0xffffff);
+ o.c=c; o.land=true;
+}
+
+const skyU={top:{value:new THREE.Color(0x1a75ff)},mid:{value:new THREE.Color(0x66b3ff)},bot:{value:new THREE.Color(0xe6f2ff)},sunPos:{value:new THREE.Vector3(0.3,0.5,-1).normalize()},sunCol:{value:new THREE.Color(0xffffff)}};
+const topT=new THREE.Color(), midT=new THREE.Color(), botT=new THREE.Color(), sunT=new THREE.Color();
+const sky=new THREE.Mesh(new THREE.SphereGeometry(900,32,20),new THREE.ShaderMaterial({uniforms:skyU,side:THREE.BackSide,depthWrite:false,fog:false,
+ vertexShader:`varying vec3 vW;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vW=wp.xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+ fragmentShader:`uniform vec3 top;uniform vec3 mid;uniform vec3 bot;uniform vec3 sunPos;uniform vec3 sunCol;varying vec3 vW;
+ void main(){vec3 d=normalize(vW);float h=d.y;vec3 c;
+ if(h>0.3)c=mix(mid,top,smoothstep(0.3,0.9,h));else if(h>0.0)c=mix(bot,mid,smoothstep(0.0,0.3,h));else c=mix(bot,bot*0.7,smoothstep(0.0,-0.4,h));
+ float dp=max(dot(d,normalize(sunPos)),0.0);c+=sunCol*pow(dp,8.0)*0.7+sunCol*pow(dp,2.0)*0.15;gl_FragColor=vec4(c,1.0);}`}));
+sky.frustumCulled=false; sky.renderOrder=-1; scene.add(sky);
+const sunCore=new THREE.Mesh(new THREE.SphereGeometry(8,24,16),new THREE.MeshBasicMaterial({color:0xffffff,fog:false}));
+function radTex(ray){ const c=document.createElement('canvas'); c.width=c.height=256; const x=c.getContext('2d');
+ if(!ray){ const g=x.createRadialGradient(128,128,0,128,128,128); g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(.1,'rgba(255,255,255,.8)'); g.addColorStop(.3,'rgba(255,255,255,.25)'); g.addColorStop(1,'rgba(255,255,255,0)'); x.fillStyle=g; x.fillRect(0,0,256,256); }
+ else { x.translate(128,128); for(let i=0;i<24;i++){ x.rotate(Math.PI/12); const g=x.createLinearGradient(0,0,125,0); g.addColorStop(0,'rgba(255,255,255,.85)'); g.addColorStop(1,'rgba(255,255,255,0)'); x.fillStyle=g; const w=2+(i%3)*2; x.beginPath(); x.moveTo(0,-w); x.lineTo(125,-.6); x.lineTo(125,.6); x.lineTo(0,w); x.fill(); } }
+ return new THREE.CanvasTexture(c); }
+const sprM=t=>new THREE.SpriteMaterial({map:t,color:0xffffff,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,fog:false});
+const sunGlow=new THREE.Sprite(sprM(radTex(false))), sunRays=new THREE.Sprite(sprM(radTex(true))), WHITE=new THREE.Color(1,1,1);
+sunGlow.scale.set(150,150,1); sunRays.scale.set(330,330,1); sunCore.add(sunGlow); sunCore.add(sunRays);
+scene.add(sunCore);
+
+const starCount=5000, starPos=new Float32Array(starCount*3), starPh=new Float32Array(starCount);
+for(let i=0;i<starCount;i++){
+ const th=Math.random()*Math.PI*2, ph=Math.acos(Math.random()*2-1);
+ const r=rnd(600,1400);
+ starPos[i*3]=r*Math.sin(ph)*Math.cos(th); starPos[i*3+1]=r*Math.sin(ph)*Math.sin(th); starPos[i*3+2]=r*Math.cos(ph);
+ starPh[i]=Math.random()*6.28;
+}
+const starGeo=new THREE.BufferGeometry(); starGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3)); starGeo.setAttribute('phase',new THREE.BufferAttribute(starPh,1));
+const starMat=new THREE.ShaderMaterial({uniforms:{time:{value:0},opacity:{value:0}},transparent:true,depthWrite:false,fog:false,
+ vertexShader:`attribute float phase;varying float vA;uniform float time;void main(){vA=0.5+0.5*sin(time*2.0+phase);vec4 mv=modelViewMatrix*vec4(position,1.0);gl_PointSize=2.2*(400.0/-mv.z);gl_Position=projectionMatrix*mv;}`,
+ fragmentShader:`varying float vA;uniform float opacity;void main(){float d=length(gl_PointCoord-0.5);if(d>0.5)discard;gl_FragColor=vec4(1.0,1.0,1.0,smoothstep(0.5,0.0,d)*vA*opacity);}`});
+const stars=new THREE.Points(starGeo,starMat); stars.frustumCulled=false; scene.add(stars);
+
+const sgeo=new THREE.BufferGeometry(), sc2=5000, spp=new Float32Array(sc2*3);
+for(let i=0;i<sc2;i++){ const u=Math.random(), v=Math.random(); const theta=u*2.0*Math.PI, phi=Math.acos(2.0*v-1.0); const r=rnd(600,1200); spp[i*3]=r*Math.sin(phi)*Math.cos(theta); spp[i*3+1]=r*Math.sin(phi)*Math.sin(theta); spp[i*3+2]=r*Math.cos(phi); }
+sgeo.setAttribute('position',new THREE.BufferAttribute(spp,3));
+const spaceStarMat = new THREE.PointsMaterial({color:0xffffff, size:1.8, fog:false});
+const spaceStars=new THREE.Points(sgeo,spaceStarMat); spaceStars.frustumCulled=false; spaceStars.visible=false; scene.add(spaceStars);
+
+const nebG=new THREE.Group();
+[[0x7a3cff,-150,60,-330,320],[0xff3c8e,170,-20,-340,260],[0x2aa8ff,20,110,-320,280],[0xff8a3c,-200,-40,-340,200]].forEach(n=>{ const nb=new THREE.Sprite(new THREE.SpriteMaterial({map:radTex(false),color:n[0],blending:THREE.AdditiveBlending,transparent:true,opacity:.28,depthWrite:false,fog:false})); nb.position.set(n[1],n[2],n[3]); nb.scale.set(n[4],n[4],1); nebG.add(nb); });
+nebG.visible=false; scene.add(nebG);
+
+function mkRange(hex,yo,zd,seed,hs){const geo=new THREE.PlaneGeometry(800,120,60,10),p=geo.attributes.position;
+ for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i);if(y>0){const h=Math.sin(x*.01+seed)*.5+Math.sin(x*.023+seed*2)*.3+Math.sin(x*.047+seed*3)*.2;p.setY(i,y+Math.abs(h)*hs);}}
+ const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:hex,fog:false,transparent:true,opacity:.9,side:THREE.DoubleSide})); m.position.set(0,yo,zd); m.frustumCulled=false; m.userData.base=new THREE.Color(hex); return m; }
+const MTNS=[mkRange(0x6699cc,25,-550,1.5,45),mkRange(0x4477aa,18,-450,3.7,35),mkRange(0x2a5588,10,-350,7.2,28)];
+const mtnGroup=new THREE.Group(); MTNS.forEach(m=>mtnGroup.add(m)); scene.add(mtnGroup);
+
+const CM=[[0xffffff,.8],[0xffffff,.6],[0xffffff,.4]].map(a=>({m:new THREE.MeshLambertMaterial({color:a[0],transparent:true,opacity:a[1],flatShading:true,emissive:0x556677,emissiveIntensity:.3}),b:new THREE.Color(a[0])}));
+const cloudGroup=new THREE.Group();
+function mkCloud(mat,n,sz,yr,zr){const g=new THREE.Group();for(let i=0;i<n;i++){const s=rnd(sz[0],sz[1]),p=new THREE.Mesh(sphG,mat); p.castShadow=true; p.receiveShadow=true; p.scale.set(s*1.4,s*.7,s*1.4);p.position.set(rnd(-s*1.5,s*1.5),rnd(-s*.3,s*.3),rnd(-s*1.5,s*1.5));g.add(p);}g.position.set(rnd(-300,300),rnd(yr[0],yr[1]),rnd(zr[0],zr[1]));return g;}
+for(let i=0;i<45;i++) cloudGroup.add(mkCloud(CM[0].m,5,[10,18],[15,45],[-900,50]));
+for(let i=0;i<30;i++) cloudGroup.add(mkCloud(CM[1].m,4,[8,14],[15,45],[-900,50]));
+for(let i=0;i<25;i++) cloudGroup.add(mkCloud(CM[2].m,3,[6,10],[15,45],[-900,50]));
+scene.add(cloudGroup);
+
+function mkParts(n,xr,yr,size,col){const pos=new Float32Array(n*3),vel=new Float32Array(n),sw=new Float32Array(n);
+ for(let i=0;i<n;i++){pos[i*3]=rnd(-xr,xr);pos[i*3+1]=rnd(0,yr);pos[i*3+2]=rnd(-350,20);vel[i]=rnd(.3,1);sw[i]=Math.random()*6.28;}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+ const mat=new THREE.PointsMaterial({color:col,size:size,transparent:true,opacity:0,depthWrite:false,fog:false});
+ const pt=new THREE.Points(g,mat);pt.frustumCulled=false;scene.add(pt);return{pt,mat,pos,vel,sw,n,xr,yr};}
+const RAIN=mkParts(1800,60,80,.4,0xaaccee), SNOW=mkParts(1000,60,80,.5,0xffffff), PET=mkParts(400,50,60,.6,0xffaacc);
+function stepParts(P,target,fall,sway,zf,dt,ti){
+ P.mat.opacity+=(target-P.mat.opacity)*.05; if(P.mat.opacity<.01)return;
+ const a=P.pos;
+ for(let i=0;i<P.n;i++){a[i*3+1]-=P.vel[i]*fall*dt; if(sway)a[i*3]+=Math.sin(ti*1.5+P.sw[i])*sway*dt; a[i*3+2]+=SCENE_SPEED*zf*dt;
+  if(a[i*3+1]<-20){a[i*3+1]=P.yr;a[i*3]=rnd(-P.xr,P.xr);a[i*3+2]=rnd(-350,20);} if(a[i*3+2]>30)a[i*3+2]=-350;}
+ P.pt.geometry.attributes.position.needsUpdate=true;
+}
+
+const rbGeo=new THREE.RingGeometry(180,210,64,1,Math.PI,Math.PI), rbP=rbGeo.attributes.position, rbC=new Float32Array(rbP.count*3);
+for(let i=0;i<rbP.count;i++){const r=Math.hypot(rbP.getX(i),rbP.getY(i)),c=new THREE.Color().setHSL(Math.max(0,Math.min(1,1-(r-180)/30))*.75,1,.65);rbC.set([c.r,c.g,c.b],i*3);}
+rbGeo.setAttribute('color',new THREE.BufferAttribute(rbC,3));
+const rbMat=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:0,side:THREE.DoubleSide,fog:false,depthWrite:false});
+const rainbow=new THREE.Mesh(rbGeo,rbMat); rainbow.position.set(0,80,-500); rainbow.rotation.z=Math.PI; rainbow.frustumCulled=false; scene.add(rainbow);
+
+const SX=100, SZ=80, tgeo=new THREE.PlaneGeometry(500,450,SX,SZ); tgeo.rotateX(-Math.PI/2); tgeo.translate(0,0,-150);
+tgeo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(tgeo.attributes.position.count*3),3));
+const terrainMat=new THREE.MeshLambertMaterial({vertexColors:true, flatShading:true});
+const terrain=new THREE.Mesh(tgeo, terrainMat); terrain.position.y=GY; terrain.frustumCulled=false; terrain.receiveShadow=true; scene.add(terrain);
+let scroll=0, lastSnap=NaN, terrDirty=true, TF=fMtn; const o1={},o2={};
+const SLZ=450/SZ;
+function updTerrain(){ if(!terrain.visible) return; const snap=Math.floor(scroll/SLZ)*SLZ; terrain.position.z=scroll-snap; if(snap===lastSnap&&!terrDirty) return; lastSnap=snap; terrDirty=false;
+ const p=tgeo.attributes.position, c=tgeo.attributes.color, ca=c.array, bl=tintBlend;
+ for(let i=0;i<p.count;i++){
+  const x=p.getX(i), z=p.getZ(i)-snap; TF(x,z,o1); p.setY(i,o1.y);
+  const v=1+n1(x*3.1,z*3.1)*.07;
+  ca[i*3]=(o1.c[0]*(1-bl)+tintRGB[0]*bl)*v; ca[i*3+1]=(o1.c[1]*(1-bl)+tintRGB[1]*bl)*v; ca[i*3+2]=(o1.c[2]*(1-bl)+tintRGB[2]*bl)*v;
+ }
+ p.needsUpdate=true; c.needsUpdate=true;
+ tgeo.computeVertexNormals(); 
+}
+
+const waterGeo = new THREE.PlaneGeometry(500, 450, 30, 30); waterGeo.rotateX(-Math.PI/2); waterGeo.translate(0, 0, -150);
+const waterMat = new THREE.MeshPhongMaterial({color: 0x1188cc, transparent: true, opacity: 0.9, shininess: 150, specular: 0xffffff, flatShading: true, side: THREE.DoubleSide});
+const waterMesh = new THREE.Mesh(waterGeo, waterMat); waterMesh.receiveShadow = true; scene.add(waterMesh);
+let waterBaseY = 0;
+
+function winTex(){ const c=document.createElement('canvas');c.width=64;c.height=128;const x=c.getContext('2d');x.fillStyle='#111827';x.fillRect(0,0,64,128);
+ for(let r=0;r<16;r++)for(let q=0;q<6;q++){ if(Math.random()<.6){x.fillStyle=Math.random()<.7?'#ffdd77':'#88ccff';x.fillRect(q*10+3,r*8+2,6,4);} }
+ const t=new THREE.CanvasTexture(c); t.magFilter=THREE.NearestFilter; return t; }
+const WM=[0,1,2].map(()=>new THREE.MeshBasicMaterial({map:winTex()}));
+const MT={g1:M(0x33aa44),g2:M(0x44cc55),g3:M(0x228833),rock2:M(0x6b5e52),cr:[0x00ffff,0xff00ff,0x9966ff].map(c=>new THREE.MeshBasicMaterial({color:c})),pine:M(0x226b38),trunk:M(0x6b482e),leaf:M(0x33bb55),cact:M(0x33aa44),dead:M(0x5a4638),rock:M(0x8a7f72),cloud:M(0xffffff,{emissive:0x555555})};
+const MFC=[0xff4477,0xffcc00,0x33ccff,0xaa44ff,0xff99bb,0xffffff].map(c=>M(c));
+const ceil=new THREE.Mesh((()=>{const g=new THREE.PlaneGeometry(500,450);g.rotateX(Math.PI/2);g.translate(0,0,-150);return g;})(),new THREE.MeshLambertMaterial({color:0x2a2030,side:THREE.DoubleSide})); ceil.position.y=22; ceil.frustumCulled=false; ceil.visible=false; ceil.receiveShadow=true; scene.add(ceil);
+const coneG4=new THREE.ConeGeometry(1,1,4);
+const HW=[0xfbeee6,0xf2c98a,0xd9e6ff,0xfadbd8].map(c=>M(c)), HR=[0xc0392b,0x7f8c8d,0x2980b9].map(c=>M(c));
+const MB={win:new THREE.MeshBasicMaterial({color:0xfff0aa}),door:new THREE.MeshBasicMaterial({color:0x6b4423}),lamp:new THREE.MeshBasicMaterial({color:0xffffaa})};
+const roadG=new THREE.Group();
+(function(){ const rm=(w,l,col,x,y)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,l),new THREE.MeshBasicMaterial({color:col}));m.rotation.x=-Math.PI/2;m.position.set(x,GY+y,-150);roadG.add(m);};
+ rm(14,450,0x333842,0,.5); rm(.3,450,0xffffff,-6.5,.55); rm(.3,450,0xffffff,6.5,.55);
+ roadG.userData.d=[]; for(let i=0;i<35;i++){const d=new THREE.Mesh(boxG,new THREE.MeshBasicMaterial({color:0xffd700}));d.scale.set(.4,.05,4.5);d.position.set(0,GY+.6,-350+i*12);roadG.add(d);roadG.userData.d.push(d);}
+ roadG.visible=false; scene.add(roadG); })();
+const decor=new THREE.Group(); scene.add(decor);
+const add=(g,geo,mat,px,py,pz,sx,sy,sz)=>{const m=new THREE.Mesh(geo,mat); m.castShadow=true; m.receiveShadow=true; m.position.set(px,py,pz);m.scale.set(sx,sy,sz);g.add(m);return m;};
+
+function planetTex(t){ const c=document.createElement('canvas'); c.width=256; c.height=128; const x=c.getContext('2d');
+ const P=[['#e6b885','#c28542','#faebd7','#9e6223'],['#2b7aff','#38a169','#f5deb3','#ffffff'],['#e65c2e','#b33b1a','#ff8566','#7a1f00'],['#4da6ff','#80bfff','#3385ff','#b3d9ff'],['#b3b3b3','#808080','#d9d9d9','#666666'],['#9b59b6','#e056fd','#732d91','#f8a5c2']][t];
+ x.fillStyle=P[0]; x.fillRect(0,0,256,128);
+ if(t===0||t===3||t===5){ for(let i=0;i<14;i++){ x.fillStyle=P[1+(i%3)]; x.globalAlpha=.55; x.fillRect(0,i*9+rnd(-3,3),256,4+rnd(0,8)); } }
+ else { for(let i=0;i<40;i++){ x.fillStyle=P[1+(i%3)]; x.globalAlpha=t===4?.5:.6; x.beginPath(); x.arc(rnd(0,256),rnd(10,118),rnd(5,t===4?10:22),0,6.3); x.fill(); } }
+ x.globalAlpha=1; return new THREE.CanvasTexture(c); }
+const PLG=new THREE.SphereGeometry(1,28,18), RNG=new THREE.RingGeometry(1.35,2.1,48), RM=new THREE.MeshBasicMaterial({color:0xf5deb3,transparent:true,opacity:.8,side:THREE.DoubleSide,fog:false});
+const PM=[0,1,2,3,4,5].map(t=>new THREE.MeshLambertMaterial({map:planetTex(t),emissive:0x222233,fog:false})), MTA=new THREE.MeshLambertMaterial({color:0x8c8275,flatShading:true,fog:false});
+const LS=new THREE.LineBasicMaterial({color:0xfffae0}), CG=new THREE.CylinderGeometry(.5,.55,1,10);
+function mkCactus(g,h){
+ const sp=[], spines=(cx,r,y0,y1,n)=>{ for(let i=0;i<n;i++){ const an=Math.random()*6.283,y=y0+Math.random()*(y1-y0),ca=Math.cos(an),sa=Math.sin(an); sp.push(cx+ca*r,y,sa*r, cx+ca*(r+.5),y+.14,sa*(r+.5)); } };
+ add(g,CG,MT.cact,0,h/2,0,1.3,h,1.3); add(g,sphG,MT.cact,0,h,0,.65,.65,.65); spines(0,.62,.3,h,34);
+ [-1,1].forEach(sg=>{ if(Math.random()<.75){ const ah=h*rnd(.35,.6), vh=rnd(1.6,3);
+  const hz=add(g,CG,MT.cact,sg*.95,ah,0,.7,1.8,.7); hz.rotation.z=Math.PI/2;
+  add(g,CG,MT.cact,sg*1.8,ah+vh/2,0,.7,vh,.7); add(g,sphG,MT.cact,sg*1.8,ah+vh,0,.35,.35,.35); spines(sg*1.8,.36,ah,ah+vh,12); } });
+ const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(sp,3)); g.add(new THREE.LineSegments(geo,LS));
+}
+
+function mk(k,t,z){
+ const g=new THREE.Group(), o={}; let yy=null; g.userData.k=k;
+ if(k==='cloud'){ for(let i=0;i<4;i++) add(g,sphG,MT.cloud,i*2-3,rnd(-.5,.5),rnd(-1,1),...Array(3).fill(rnd(2,3.5))); g.position.set((Math.random()<.5?-1:1)*rnd(14,70),rnd(6,26),z); return g; }
+ if(k==='planet'){ const sg=Math.random()<.5?-1:1;
+  if(Math.random()<.2){ const t=Math.floor(Math.random()*6), r=rnd(9,26), p=new THREE.Mesh(PLG,PM[t]); p.castShadow=true; p.receiveShadow=true; p.scale.setScalar(r); g.add(p);
+   if((t===0||t===5)&&Math.random()<.7){ const rg=new THREE.Mesh(RNG,RM); rg.scale.setScalar(r); rg.rotation.x=Math.PI/2.3; rg.rotation.y=rnd(-.4,.4); g.add(rg); }
+   g.position.set(sg*rnd(r+22,r+70),rnd(-12,38),z); g.userData.sp=.35; }
+  else { const a=new THREE.Mesh(rockG,MTA); a.castShadow=true; a.receiveShadow=true; a.scale.set(rnd(.8,3),rnd(.8,2.5),rnd(.8,3)); a.rotation.set(rnd(0,6),rnd(0,6),0); g.add(a); g.position.set(sg*rnd(12,60),rnd(-14,26),z); g.userData.sp=1; }
+  return g; }
+ for(let a=0;a<12;a++){
+  let x=(Math.random()<.5?-1:1)*rnd(t.dx[0],t.dx[1]); t.f(x,z-scroll,o); if(!o.land) continue;
+  if(k==='pine'){ const h=rnd(.8,1.5); add(g,cylG,MT.trunk,0,1*h,0,1.5,2*h,1.5); add(g,coneG,MT.pine,0,3.5*h,0,2.6*h,5*h,2.6*h); add(g,coneG,MT.pine,0,6*h,0,1.9*h,4*h,1.9*h); }
+  else if(k==='palm'){ const h=rnd(5,9); add(g,cylG,MT.trunk,0,h/2,0,1,h,1); add(g,sphG,MT.leaf,0,h,0,3,1,3); }
+  else if(k==='garden'){
+   const r=Math.random();
+   if(r<.3){ const h=rnd(4,7); add(g,cylG,MT.trunk,0,h/2,0,1.2,h,1.2); add(g,sphG,MFC[4+(a%2)],0,h,0,rnd(2.5,4),rnd(2.5,3.5),rnd(2.5,4)); }
+   else if(r<.6){ const h=rnd(4,8), cm=[MT.g1,MT.g2,MT.g3][a%3]; add(g,cylG,MT.trunk,0,h/2,0,1.2,h,1.2); add(g,sphG,cm,0,h,0,rnd(3,4),rnd(2.5,3.5),rnd(3,4)); }
+   else { add(g,sphG,MFC[a%4],0,rnd(.5,1),0,rnd(.8,1.5),rnd(.8,1.5),rnd(.8,1.5)); }
+  }
+  else if(k==='city'){ const sg=x<0?-1:1, r=Math.random();
+   if(r<.10){ x=sg*8.6; add(g,cylG,MT.rock2,0,3,0,.5,6,.5); add(g,sphG,MB.lamp,0,6.3,0,.7,.7,.7); }
+   else if(r<.68){
+    x=sg*rnd(10,36);
+    const numH = 2 + Math.floor(Math.random()*2);
+    for(let hIdx=0; hIdx<numH; hIdx++){
+     const ox = hIdx===0 ? 0 : rnd(-9,9), oz = hIdx===0 ? 0 : rnd(-9,9);
+     const w=rnd(4.5,7.5),h=rnd(3.5,5.5),d=rnd(4.5,7.5);
+     add(g,boxG,HW[(a+hIdx)%4],ox,h/2,oz,w,h,d);
+     const rf=add(g,coneG4,HR[(a+hIdx)%3],ox,h+1.5,oz,w*.68,3,d*.68); rf.rotation.y=Math.PI/4;
+     const wx0=ox-sg*(w/2+.05);
+     add(g,boxG,MB.win,wx0,h*.6,oz-d*.25,.1,1,1.2);
+     add(g,boxG,MB.win,wx0,h*.6,oz+d*.25,.1,1,1.2);
+     add(g,boxG,MB.door,wx0,1,oz,.1,2,1.1);
+    }
+   }
+   else {
+    x=sg*rnd(34,78);
+    const numB = 1 + Math.floor(Math.random()*2);
+    for(let bIdx=0; bIdx<numB; bIdx++){
+     const ox = bIdx===0 ? 0 : rnd(-12,12), oz = bIdx===0 ? 0 : rnd(-12,12);
+     const w=rnd(6,11),h=rnd(16,54);
+     add(g,boxG,WM[(a+bIdx)%3],ox,h/2,oz,w,h,w);
+    }
+   } }
+  else if(k==='cactus'){ mkCactus(g,rnd(4,8)); }
+  else if(k==='tree'){ if(Math.random()<.3){ const h=rnd(.9,1.6); add(g,cylG,MT.trunk,0,h,0,1.5,2*h,1.5); add(g,coneG,MT.pine,0,3.5*h,0,2.6*h,5*h,2.6*h); add(g,coneG,MT.pine,0,6*h,0,1.9*h,4*h,1.9*h); } else { const h=rnd(5,10), cm=[MT.g1,MT.g2,MT.g3][a%3]; add(g,cylG,MT.trunk,0,h/2,0,1.8,h,1.8); add(g,sphG,cm,0,h,0,rnd(3.5,5),rnd(3,4),rnd(3.5,5)); add(g,sphG,cm,rnd(-1.5,1.5),h+rnd(1,2),rnd(-1,1),rnd(2.5,3.5),rnd(2,3),rnd(2.5,3.5)); } }
+  else if(k==='cave'){ const r=Math.random(), w=rnd(1.2,2.8), h=rnd(4,10);
+   if(r<.4) add(g,coneG,MT.rock2,0,h/2,0,w,h,w);
+   else if(r<.7){ const m=add(g,coneG,MT.rock2,0,-h/2,0,w,h,w); m.rotation.x=Math.PI; yy=20; }
+   else for(let i=0;i<3;i++){ const m=add(g,rockG,MT.cr[i],(i-1)*1.1,1.2+i*.3,rnd(-.5,.5),.7,2+i*.9,.7); m.rotation.z=(i-1)*.35; } }
+  else if(Math.random()<.4){ mkCactus(g,rnd(3.5,7.5)); }
+  else if(Math.random()<.35){ const s=rnd(1.5,4); add(g,rockG,MT.rock,0,s*.6,0,s,s*.8,s); }
+  else { const h=rnd(5,9); add(g,cylG,MT.dead,0,h/2,0,1.3,h,1.3); for(let b=-1;b<=1;b+=2){ const m=add(g,cylG,MT.dead,b*1.2,h*.75,0,.6,3,.6); m.rotation.z=-b*.8; } }
+  g.position.set(x,yy!==null?yy:GY+o.y,z); return g;
+ }
+ g.position.set(0,-400,z); return g;
+}
+
+const SEASONS={
+ semi:{name:'Musim Semi',icon:'🌸',top:0x1a75ff,mid:0x66b3ff,bot:0xe6f2ff,sunCol:0xffffff,sunPos:{x:.3,y:.7,z:-1},fogNear:200,fogFar:900,ambInt:.85,sunInt:1.1,groundTint:0x99dd66, hemi:{sky:0xe6f2ff, ground:0x558833}, wc:{clear:.45,rain:.15,petals:.3,fog:.05,storm:.05}},
+ panas:{name:'Musim Panas',icon:'☀️',top:0x0055ff,mid:0x3399ff,bot:0xfffae0,sunCol:0xffffff,sunPos:{x:.2,y:.9,z:-1},fogNear:250,fogFar:1000,ambInt:.95,sunInt:1.3,groundTint:0xaaee55, hemi:{sky:0xfffae0, ground:0x668822}, wc:{clear:.6,rain:.05,heat:.25,storm:.1}},
+ gugur:{name:'Musim Gugur',icon:'🍂',top:0x7a4a1a,mid:0xb07040,bot:0xfce8c8,sunCol:0xfff0d0,sunPos:{x:-.5,y:.5,z:-1},fogNear:180,fogFar:800,ambInt:.75,sunInt:.9,groundTint:0xc08040, hemi:{sky:0xfce8c8, ground:0x885533}, wc:{clear:.35,rain:.2,petals:.35,fog:.05,storm:.05}},
+ dingin:{name:'Musim Dingin',icon:'❄️',top:0x2a4a7a,mid:0x5a8ab0,bot:0xe8f4ff,sunCol:0xffffff,sunPos:{x:.4,y:.4,z:-1},fogNear:150,fogFar:700,ambInt:.65,sunInt:.8,groundTint:0xf0f6ff, hemi:{sky:0xe8f4ff, ground:0x99aacc}, wc:{clear:.3,snow:.55,fog:.15}}
+};
+let currentSeason='semi', currentWeather='clear', wDim=0, wTimer=12, sunBase=[.9,.2], nightF=1, lightningTimer=0, rbOp=0, tintRGB=hx(0x99dd66), tintBlend=.35, fogBase=900, terrDim=1;
+const GRAYC=new THREE.Color(0x7f8c8d), TMPC=new THREE.Color();
+const WICON={rain:' 🌧️',snow:' ❄️',petals:' 🌸',fog:' 🌫️',heat:' 🔥',storm:' ⛈️'};
+function updateSeasonBadge(){ const s=SEASONS[currentSeason]; $('season-badge').textContent=theme.space?'🚀 Luar Angkasa':s.icon+' '+s.name+(theme.cave?'':(WICON[currentWeather]||'')); }
+function pickWeather(){ const r=Math.random(); let c=0; for(const [w,p] of Object.entries(SEASONS[currentSeason].wc)){c+=p;if(r<=c)return w;} return 'clear'; }
+function updateParticleColors(){ PET.mat.color.set({gugur:0xd97736,semi:0xffb3d1,panas:0xffe066,dingin:0xffffff}[currentSeason]); }
+
+function applyLook(instant){ terrDirty=true;
+ const s=SEASONS[currentSeason], k=theme.sky||s;
+ topT.set(k.top); midT.set(k.mid); botT.set(k.bot); sunT.set(theme.sunCol||s.sunCol);
+ const sp=theme.sunPos||s.sunPos; sunCore.position.set(sp.x*170,38+sp.y*55,-340); skyU.sunPos.value.copy(sunCore.position).normalize();
+ sunCore.visible=!theme.cave; sunCore.children.forEach(c=>c.visible=!theme.cave); sunGlow.material.opacity=theme.space?.8:(theme.night?.55:.95); sunRays.material.opacity=theme.space?0:(theme.night?.05:.18); sunBase=[sunGlow.material.opacity,sunRays.material.opacity];
+ if(instant){ skyU.top.value.copy(topT); skyU.mid.value.copy(midT); skyU.bot.value.copy(botT); skyU.sunCol.value.copy(sunT); }
+ 
+ hemi.intensity=theme.amb!==undefined?theme.amb:s.ambInt;
+ const hc = theme.hemi || s.hemi;
+ if(hc){ hemi.color.setHex(hc.sky); hemi.groundColor.setHex(hc.ground); }
+ sun.intensity=theme.li!==undefined?theme.li:s.sunInt;
+ sun.position.set(sp.x*150, 100 + sp.y*60, -20);
+ headlight.intensity = (theme.cave || theme.night || theme.space) ? 1.8 : 0;
+ 
+ waterMesh.visible = !!theme.water;
+ if(theme.water){ waterBaseY = theme.water.y; waterMat.color.setHex(theme.water.c); }
+ 
+ scene.fog.near=Math.min(theme.fn||999,s.fogNear); fogBase=Math.min(theme.fg||999,s.fogFar); if(instant)scene.fog.far=fogBase;
+ tintRGB=hx(s.groundTint); tintBlend=theme.tint===false?0:.35; terrDim=theme.night?.4:1;
+ const sp0=!!theme.space; mtnGroup.visible=!theme.cave&&!sp0; cloudGroup.visible=!theme.cave&&!sp0; ceil.visible=!!theme.cave; terrain.visible=!sp0; spaceStars.visible=sp0; nebG.visible=sp0; sunCore.scale.setScalar(1);
+ updateSeasonBadge();
+}
+function applySeason(n,instant){ currentSeason=n; applyLook(instant); }
+
+const THEMES=[
+ {id:'city',n:'Kota',f:fCity,d:'city',dx:[10,75],num:165,fn:180,fg:750,tint:false,dn:1},
+ {id:'space',n:'Luar Angkasa',f:fFlat,d:'planet',dx:[10,60],num:30,fn:500,fg:1200,space:1,tint:false,amb:.4,li:1.2,sunCol:0xffffff,sunPos:{x:.45,y:.3,z:-1},sky:{top:0x05081a,mid:0x10183f,bot:0x2a1f5a}, hemi:{sky:0x333366, ground:0x111122}},
+ {id:'garden',n:'Kebun Warna-warni',f:fGarden,d:'garden',dx:[8,60],num:90,fn:250,fg:900,amb:.95,li:1.2,sunCol:0xffffff,sunPos:{x:.25,y:.7,z:-1},sky:{top:0x1a75ff,mid:0x66b3ff,bot:0xe6f2ff},tint:false},
+ {id:'mtn',n:'Pegunungan',f:fMtn,d:'pine',dx:[12,60],num:34,fn:200,fg:800},
+ {id:'sea',n:'Laut Berpulau',f:fSea,d:'palm',dx:[14,70],num:36,fn:200,fg:850, water:{y:1.5, c:0x0099ff}},
+ {id:'des',n:'Gurun',f:fDes,d:'cactus',dx:[11,60],num:42,fn:250,fg:900},
+ {id:'wst',n:'Padang Tandus',f:fWst,d:'dead',dx:[10,60],num:44,fn:200,fg:800},
+ {id:'for',n:'Hutan Rimba',f:fFor,d:'tree',dx:[8,50],num:70,fn:180,fg:700},
+ {id:'cave',n:'Goa Kristal',f:fCave,d:'cave',dx:[5,11],num:50,fn:80,fg:450,cave:1,tint:false,amb:.65,li:.3,sky:{top:0x110d1c,mid:0x201730,bot:0x352650}, hemi:{sky:0x442266, ground:0x221133}, water:{y:0, c:0x00f2ff}}
+];
+let theme=THEMES[0];
+function getThemeName(t){
+ const tr=I18N[curLang].themes;
+ if(t.id==='city') return t.night?tr.cityNight:tr.cityDay;
+ return tr[t.id]||t.n;
+}
+function updateSeasonBadge(){
+ const tr=I18N[curLang].seasons, s=SEASONS[currentSeason];
+ $('season-badge').textContent=theme.space?tr.space:s.icon+' '+tr[currentSeason]+(theme.cave?'':(WICON[currentWeather]||''));
+}
+function setTheme(t,snap){
+ theme=t; TF=t.f; if(t.dn){ const nn=Math.random()<.5; t.night=nn?1:0; t.sky=nn?{top:0x080c24,mid:0x141d45,bot:0x384180}:null; t.sunCol=nn?0xffffff:null; t.sunPos=nn?{x:.35,y:.6,z:-1}:null; t.amb=nn?.75:undefined; t.li=nn?.5:undefined; t.hemi=nn?{sky:0x333355, ground:0x1a1a2e}:null; } roadG.visible=t.d==='city';
+ while(decor.children.length) decor.remove(decor.children[0]);
+ for(let i=0;i<t.num;i++) decor.add(mk(t.d,t,rnd(-600,40)));
+ applyLook(snap); updTerrain(); $('hl').textContent='📍 '+getThemeName(t);
+}
+setTheme(THEMES[0],true);
+
+const keys={};
+addEventListener('keydown',e=>{if(!e.key)return; keys[e.key.toLowerCase()]=1; if(e.key.indexOf('Arrow')===0)e.preventDefault();});
+addEventListener('keyup',e=>{if(!e.key)return; keys[e.key.toLowerCase()]=0;});
+const joy={x:0,y:0}, jb=$('joy'), jk=$('knob');
+(function(){ let id=null;
+ function mv(e){ const r=jb.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2; let dx=e.clientX-cx, dy=e.clientY-cy; const R=r.width/2-jk.offsetWidth/2+8, d=Math.hypot(dx,dy); if(d>R){dx*=R/d;dy*=R/d;} jk.style.transform='translate('+dx+'px,'+dy+'px)'; joy.x=dx/R; joy.y=dy/R; }
+ jb.addEventListener('pointerdown',e=>{id=e.pointerId; try{jb.setPointerCapture(id);}catch(_){} mv(e); e.preventDefault();});
+ jb.addEventListener('pointermove',e=>{ if(e.pointerId===id) mv(e); });
+ const up=e=>{ if(e.pointerId!==id)return; id=null; joy.x=joy.y=0; jk.style.transform='translate(0,0)'; joyRelease(); };
+ jb.addEventListener('pointerup',up); jb.addEventListener('pointercancel',up);
+})();
+let drag=null;
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY}; try{cv.setPointerCapture(e.pointerId);}catch(_){}});
+cv.addEventListener('pointermove',e=>{ if(!drag)return; const k=18/Math.min(innerWidth,innerHeight)*1.6; tg.x+=(e.clientX-drag.x)*k; tg.y-=(e.clientY-drag.y)*k; drag.x=e.clientX; drag.y=e.clientY; });
+addEventListener('pointerup',()=>{drag=null});
+
+let st='menu', pool=[], round=0, rounds=12, score=0, lives=3, ok=0, bad=0, qt=0, t0=0, name='', fx=[], shake=0, curQ=null, lanes=[], curLane=0, gates=null, gs=0, themeOff=0, sel=0, joyMoved=false, joyCool=0;
+let LT=10;
+const COL=[0xff6b35,0x3a86ff,0x2ec4b6,0x9b5de5];
+const LANES=[{n:'MERAH',c:0xe63946},{n:'KUNING',c:0xf0a500},{n:'BIRU',c:0x3a86ff},{n:'HIJAU',c:0x2fb344}];
+const catOf=q=>{ const c=I18N[curLang].cats; return c[q.q.codePointAt(0)]||c.def; };
+const cleanQ=q=>q.q.replace(/^[\u{267B}\u{1F333}\u{1F522}\u{1F4D6}]\uFE0F?\s*(NUMERASI:|LITERASI:)?\s*/u,'');
+const hex6=c=>'#'+c.toString(16).padStart(6,'0');
+function hudLives(){ $('hv').textContent='❤️'.repeat(Math.max(lives,0))||'💔'; }
+
+function rrShape(w,r){ const s=new THREE.Shape(),h=w/2; s.moveTo(-h+r,-h); s.lineTo(h-r,-h); s.quadraticCurveTo(h,-h,h,-h+r); s.lineTo(h,h-r); s.quadraticCurveTo(h,h,h-r,h); s.lineTo(-h+r,h); s.quadraticCurveTo(-h,h,-h,h-r); s.lineTo(-h,-h+r); s.quadraticCurveTo(-h,-h,-h+r,-h); return s; }
+const FRM=(()=>{ const o=rrShape(4.7,.95); o.holes.push(rrShape(3.95,.75)); const g=new THREE.ExtrudeGeometry(o,{depth:.4,bevelEnabled:false,curveSegments:6}); g.translate(0,0,-.2); return g; })();
+const PNL=new THREE.PlaneGeometry(3.95,3.95);
+function rrp(x,X,Y,W,H,R){ x.beginPath(); x.moveTo(X+R,Y); x.arcTo(X+W,Y,X+W,Y+H,R); x.arcTo(X+W,Y+H,X,Y+H,R); x.arcTo(X,Y+H,X,Y,R); x.arcTo(X,Y,X+W,Y,R); x.closePath(); }
+function wrapTxt(x,t,mw){ const w=String(t).split(' '),L=[]; let l=''; w.forEach(k=>{ const tt=l?l+' '+k:k; if(x.measureText(tt).width>mw&&l){L.push(l);l=k;} else l=tt; }); if(l)L.push(l); return L; }
+function boxTex(col,lane,label,text){
+ const c=document.createElement('canvas'); c.width=c.height=512; const x=c.getContext('2d');
+ const g=x.createLinearGradient(0,0,0,512); g.addColorStop(0,hex6(col)); g.addColorStop(1,'#0b1530');
+ x.globalAlpha=.92; rrp(x,6,6,500,500,90); x.fillStyle=g; x.fill(); x.globalAlpha=1;
+ x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle';
+ if(lane){
+  x.font='bold 340px sans-serif'; x.fillText('?',256,245); x.font='bold 40px sans-serif'; x.globalAlpha=.85; x.fillText(I18N[curLang].mystery,256,458);
+ } else {
+  x.fillStyle='rgba(0,0,0,.35)'; x.beginPath(); x.arc(256,80,54,0,6.283); x.fill(); x.fillStyle='#fff'; x.font='bold 76px sans-serif'; x.fillText(label,256,84);
+  let fs=60,L; for(;;){ x.font='bold '+fs+'px sans-serif'; L=wrapTxt(x,text,420); if(L.length*fs*1.2<=300||fs<=22)break; fs-=4; }
+  const y0=150+(330-L.length*fs*1.2)/2+fs*.6; L.forEach((t,i)=>x.fillText(t,256,y0+i*fs*1.2));
+ }
+ return new THREE.CanvasTexture(c);
+}
+
+function buildBoxes(items,lane){
+ const g=new THREE.Group(); g.userData.p=[]; g.userData.panels=[]; const n=items.length;
+ items.forEach((it,i)=>{
+  const gx=-(n-1)*4+i*8, gy=rnd(12,18), col=lane?LANES[i].c:COL[i]; 
+  const fr=new THREE.Mesh(FRM,new THREE.MeshStandardMaterial({color:col, roughness:0.2, metalness:0.6})); 
+  fr.castShadow=true; fr.receiveShadow=true; fr.position.set(gx,gy,0); g.add(fr);
+  const laneName = I18N[curLang].lanes[i] || LANES[i].n;
+  const pn=new THREE.Mesh(PNL,new THREE.MeshBasicMaterial({map:boxTex(col,lane,lane?laneName:'ABCD'[i],lane?'':it),transparent:true,depthWrite:false})); pn.position.set(gx,gy,0.05); pn.userData.pos=[gx,gy]; g.add(pn);
+  g.userData.panels.push(pn); g.userData.p.push([gx,gy]);
+ });
+ g.position.z=-GATE_DIST; scene.add(g); return g;
+}
+function clearGates(){ if(!gates) return; gates.traverse(o=>{ if(o.material){ if(o.material.map) o.material.map.dispose(); o.material.dispose(); } }); scene.remove(gates); gates=null; }
+function spawn(items,lane,T){ clearGates(); gates=buildBoxes(items,lane); gs=GATE_DIST/(T*GATE_FRAC); }
+function nearest(){ let pick=0,best=1e9; gates.userData.p.forEach((p,i)=>{ const d=Math.max(Math.abs(px.x-p[0]),Math.abs(px.y-p[1])); if(d<best){best=d;pick=i;} }); return {pick,best}; }
+
+function start(){
+ if(!AC){ try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(AC&&AC.state==='suspended')AC.resume();
+ name=($('nm').value||'').trim()||I18N[curLang].defaultStudent;
+ pool=Q.map((_,i)=>i); if(+S.shuffle) for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+ rounds=autoMode ? Math.min(Q.length,20) : Math.min(Q.length,20); round=0;themeOff=Math.floor(Math.random()*THEMES.length);score=0;ok=0;bad=0;lives=Math.max(1,(+S.lives||5)-D.lv); t0=performance.now(); px.x=0; px.y=20; tg.x=0; tg.y=20; clearGates();
+ show(null); $('hud').style.display='block'; $('ctl').style.display='flex'; $('joy').style.display='block'; $('season-badge').style.display='block'; hudLives(); $('hs').textContent='⭐ 0';
+ nextRound();
+}
+function nextRound(){
+ if(round>=rounds||lives<=0) return end();
+ const nt=THEMES[(Math.floor(round/THEME_EVERY)+themeOff)%THEMES.length];
+ if(nt!==theme){ const fl=$('fl'); fl.style.transition='none'; fl.style.opacity=1; setTheme(nt); requestAnimationFrame(()=>{fl.style.transition='opacity .7s'; fl.style.opacity=0;}); }
+ if(round%WEATHER_CHANGE_EVERY===0){ const sk=Object.keys(SEASONS), ns=sk[round%sk.length]; if(ns!==currentSeason) applySeason(ns,false); currentWeather=pickWeather(); updateParticleColors(); updateSeasonBadge(); if((currentWeather==='rain'||currentWeather==='storm')&&!theme.cave) setTimeout(()=>{ if(AC&&!muted) for(let i=0;i<3;i++) beep(80,.15,'sawtooth',.05,i*.1); },500); }
+ $('cards').className=''; lanes=pool.splice(0,Math.min(4,pool.length)); curQ=null; st='lane';
+ const tr=I18N[curLang];
+ $('hn').textContent=(round+1)+'/'+rounds; $('barw').style.visibility='hidden';
+ $('q').innerHTML='<b>'+tr.chooseLane+'</b><div class="sub">'+tr.chooseLaneSub(round+1,rounds)+'</div>';
+ spawn(lanes,true,LT);
+}
+
+function chooseLane(i){
+ curLane=i; pool.push(...lanes.filter((_,k)=>k!==i)); 
+ const baseQ = Q[lanes[i]];
+ curQ=JSON.parse(JSON.stringify(baseQ)); 
+ 
+ let opts = curQ.o.map((txt, idx) => ({txt, ok: idx === curQ.a, origIdx: idx}));
+ for(let j = opts.length - 1; j > 0; j--){
+  const k = Math.floor(Math.random() * (j + 1));
+  [opts[j], opts[k]] = [opts[k], opts[j]];
+ }
+ curQ.o = opts.map(o => o.txt);
+ curQ.origOrder = opts.map(o => o.origIdx);
+ curQ.a = opts.findIndex(o => o.ok);
+
+ beep(740,.12,'triangle'); const L=LANES[i], tr=I18N[curLang], laneName=tr.lanes[i]||L.n;
+ $('q').innerHTML='<div class="sub"><span class="chip" style="background:'+hex6(L.c)+'">'+catOf(curQ)+' · '+tr.lane+' '+laneName+'</span> '+tr.qWord+' '+(round+1)+'/'+rounds+'</div><b class="q-txt">'+esc(cleanQ(curQ))+'</b>';
+ qt=QT; st='qa'; sel=0; clearGates(); $('barw').style.visibility='visible'; $('bar').style.width='100%'; renderCards();
+ const fb=$('fb'); fb.textContent=tr.lane+' '+laneName+'!'; fb.style.opacity=1; setTimeout(()=>{ if(st==='qa') fb.style.opacity=0; },900);
+}
+
+function renderCards(){
+ const c=$('cards'); c.style.pointerEvents='auto'; c.className='ans';
+ c.innerHTML=curQ.o.map((o,i)=>'<button class="bx" data-i="'+i+'" style="--c:'+hex6(COL[i])+'"><span class="lt">'+'ABCD'[i]+'</span><span class="at">'+esc(o)+'</span></button>').join('');
+ updSel();
+}
+function updSel(){ [...$('cards').children].forEach((c,i)=>c.classList.toggle('sel',i===sel)); }
+function moveSel(d){ const n=$('cards').children.length, ns=Math.max(0,Math.min(n-1,sel+d)); if(ns!==sel){ sel=ns; updSel(); beep(520,.05,'square',.05); } }
+function joyRelease(){ if(joyMoved&&st==='qa'){ joyMoved=false; answer(sel,false); } joyMoved=false; }
+function answer(i,timeout){
+ if(st!=='qa') return; st='fb'; const right=!timeout&&i===curQ.a, c=$('cards'), tr=I18N[curLang]; c.style.pointerEvents='none';
+ [...c.children].forEach((b,k)=>{ if(k===curQ.a) b.classList.add('ok'); else if(k===i) b.classList.add('no'); });
+ const fb=$('fb'); fb.style.opacity=1;
+ if(right){ score+=100; ok++; fb.textContent=tr.correct; sndOk(); burst(plane.position.x,plane.position.y); }
+ else { bad++; lives--; hudLives(); shake=.6; sndBad(); fb.textContent=(timeout?tr.timeout:tr.wrong)+tr.ansWord+'ABCD'[curQ.a]; }
+ $('hs').textContent='⭐ '+score;
+ setTimeout(()=>{ fb.style.opacity=0; round++; nextRound(); },1500);
+}
+
+$('cards').addEventListener('click',e=>{ const b=e.target.closest('[data-i]'); if(b&&st==='qa') answer(+b.dataset.i,false); });
+$('cards').addEventListener('mouseover',e=>{ const b=e.target.closest('[data-i]'); if(b&&st==='qa'){ sel=+b.dataset.i; updSel(); } });
+addEventListener('keydown',e=>{
+ if(st!=='qa' || !e.key) return; const k=e.key.toLowerCase(); let d=0;
+ if(k==='arrowright'||k==='d') d=1; else if(k==='arrowleft'||k==='a') d=-1; else if(k==='arrowdown'||k==='s') d=2; else if(k==='arrowup'||k==='w') d=-2;
+ if(d){ moveSel(d); e.preventDefault(); }
+ else if(k==='enter'||k===' '){ answer(sel,false); e.preventDefault(); }
+ else if(k>='1'&&k<='4'&&k.length===1){ answer(+k-1,false); }
+});
+
+const ray=new THREE.Raycaster(), mv2=new THREE.Vector2(); let downAt=null;
+cv.addEventListener('pointerdown',e=>{ downAt={x:e.clientX,y:e.clientY}; });
+cv.addEventListener('pointerup',e=>{
+ if(!downAt||!gates||(st!=='lane'&&st!=='qa')){ downAt=null; return; }
+ const moved=Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y); downAt=null; if(moved>10) return;
+ mv2.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1); ray.setFromCamera(mv2,cam);
+ const h=ray.intersectObjects(gates.userData.panels,false)[0]; if(h){ tg.x=h.object.userData.pos[0]; tg.y=h.object.userData.pos[1]; beep(520,.05,'square',.05); }
+});
+addEventListener('keydown',e=>{ if(!gates||(st!=='lane'&&st!=='qa')) return; const k=e.key; if(k>='1'&&k<='4'){ const p=gates.userData.p[+k-1]; if(p){ tg.x=p[0]; tg.y=p[1]; } } });
+function burst(x,y){ for(let i=0;i<50;i++){ const m=new THREE.Mesh(boxG,new THREE.MeshBasicMaterial({color:COL[i%4]})); m.scale.setScalar(.25); m.position.set(x,y,-2); scene.add(m); fx.push({m,v:new THREE.Vector3(rnd(-8,8),rnd(-2,10),rnd(-6,6)),l:1.2}); } }
+
+function end(){
+ st='end'; SCENE_SPEED=BASE_SPEED; clearGates(); $('cards').className=''; $('hud').style.display='none'; $('ctl').style.display='none'; $('joy').style.display='none'; $('season-badge').style.display='none';
+ const sec=Math.round((performance.now()-t0)/1000);
+ window._lastSec = sec;
+ renderEndScreen(sec);
+ show('s-end');
+}
+
+function renderEndScreen(sec){
+ const tr = I18N[curLang];
+ const diffIdx = DIFFS.indexOf(D);
+ const diffName = tr.diffs[diffIdx>=0?diffIdx:1].n;
+ const isPerfect = (ok === rounds && bad === 0 && lives > 0);
+ if (isPerfect) {
+  $('et').textContent = tr.endPerfect;
+ } else {
+  $('et').textContent = lives > 0 ? tr.endDone : tr.endOver;
+ }
+ const congratsMsg = isPerfect 
+  ? '<div style="background:rgba(46,196,182,0.18);border:2px solid var(--ok);padding:12px;border-radius:14px;margin-bottom:12px;font-weight:800;color:var(--ok);">' + tr.congratsPerfect(rounds) + '</div>' 
+  : (lives > 0 ? '<div style="margin-bottom:10px;font-weight:700;color:var(--acc);">' + tr.congratsDone + '</div>' : '');
+ $('er').innerHTML = congratsMsg + '👤 <b>'+esc(name)+'</b> · '+diffName+'<br>⭐ '+tr.totScore+': <b style="font-size:1.35em;color:var(--acc)">'+score+'</b><br>✔ '+tr.lblRight+': '+ok+' / '+rounds+' &nbsp; ✘ '+tr.lblWrong+': '+bad+'<br>⏱ '+tr.lblTime+': '+sec+' '+tr.secWord;
+ window._rec={nama:name,tingkat:diffName,skor:score,benar:ok,salah:bad,waktu:sec,tanggal:new Date().toLocaleString(curLang==='id'?'id-ID':'en-US')};
+ if(WEBHOOK_URL){ try{ fetch(WEBHOOK_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(window._rec)}); }catch(e){} }
+}
+
+const DIFFS=[
+ {n:'MUDAH',i:'🌱',c:'linear-gradient(135deg,#2ec4b6,#1a9e8f)',tm:1.5,lv:0,sc:1,sp:.85,lt:13,d:'Santai'},
+ {n:'SEDANG',i:'🚀',c:'linear-gradient(135deg,#f0a500,#e07b00)',tm:1,lv:1,sc:1.5,sp:1,lt:10,d:'Seimbang'},
+ {n:'SULIT',i:'🔥',c:'linear-gradient(135deg,#e63946,#a31d2a)',tm:.6,lv:2,sc:2,sp:1.3,lt:7,d:'Cepat & menantang'}];
+let D=DIFFS[1], QT=20;
+function initAudio(){ if(!AC){ try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(AC&&AC.state==='suspended')AC.resume(); }
+
+let autoMode = true;
+
+function renderDiffButtons(){
+ const tr = I18N[curLang];
+ $('dlist').innerHTML=DIFFS.map((d,i)=>{
+  const td = tr.diffs[i];
+  return '<button class="big dif" data-d="'+i+'" style="background:'+d.c+';color:#fff">'+d.i+' '+td.n+'<span class="ds">'+td.d+' · '+tr.timeWord+' '+Math.max(5,Math.round((+S.timer||20)*d.tm))+' '+tr.secWord+' · '+tr.livesWord+' '+Math.max(1,(+S.lives||5)-d.lv)+' · '+tr.scoreFixed+'</span></button>';
+ }).join('');
+}
+
+function showDiff(){
+ const v=($('nm').value||'').trim(), tr=I18N[curLang];
+ if(!v){ $('nm').style.borderColor='var(--bad)'; $('nm').placeholder=tr.nmErr; $('nm').focus(); return; }
+ $('nm').style.borderColor=''; initAudio(); $('dn').textContent=v;
+ renderDiffButtons();
+ show('s-diff');
+}
+function countdown(done){
+ show(null); const cd=$('cd'); cd.style.display='flex'; let n=3;
+ const tick=()=>{ if(n===0){ cd.style.display='none'; done(); return; } cd.innerHTML='<span>'+n+'</span>'; beep(n===1?880:660,.18,'triangle',.2); n--; setTimeout(tick,1000); };
+ tick();
+}
+
+function setLanguage(lang){
+ curLang = I18N[lang] ? lang : 'id';
+ const tr = I18N[curLang];
+ document.documentElement.lang = curLang;
+ document.documentElement.dir = curLang === 'ar' ? 'rtl' : 'ltr';
+
+ $('t-splash').textContent = tr.splash;
+ $('t-desc').innerHTML = tr.desc;
+ $('nm').placeholder = tr.nmPh;
+ $('go').textContent = tr.go;
+ $('t-help').textContent = tr.help;
+ $('t-hello').textContent = tr.hello;
+ $('t-pickdiff').textContent = tr.pickDiff;
+ $('dBack').textContent = tr.back;
+ $('again').textContent = tr.again;
+ $('cc').textContent = tr.copyRec;
+ $('mn').textContent = tr.menu;
+
+ BANK_ADIWIYATA = getBank(curLang);
+
+ if(Q && Q.length){
+  Q = Q.map(oldQ => {
+   if(oldQ.idx !== undefined && BANK_ADIWIYATA[oldQ.idx]){
+    return JSON.parse(JSON.stringify(BANK_ADIWIYATA[oldQ.idx]));
+   }
+   return oldQ;
+  });
+ } else {
+  Q = JSON.parse(JSON.stringify(BANK_ADIWIYATA.slice(0, 20)));
+ }
+
+ renderDiffButtons();
+ $('hl').textContent = '📍 ' + getThemeName(theme);
+ updateSeasonBadge();
+
+ if(st === 'lane'){
+  $('q').innerHTML='<b>'+tr.chooseLane+'</b><div class="sub">'+tr.chooseLaneSub(round+1,rounds)+'</div>';
+  if(gates){
+   const oldZ = gates.position.z;
+   clearGates();
+   gates = buildBoxes(lanes, true);
+   gates.position.z = oldZ;
+  }
+ } else if((st === 'qa' || st === 'fb') && curQ && curQ.idx !== undefined){
+  const fresh = BANK_ADIWIYATA[curQ.idx];
+  if(fresh){
+   curQ.q = fresh.q;
+   if(curQ.origOrder){
+    curQ.o = curQ.origOrder.map(oi => fresh.o[oi]);
+   } else {
+    curQ.o = fresh.o.slice();
+   }
+   const L = LANES[curLane], laneName = tr.lanes[curLane] || L.n;
+   $('q').innerHTML='<div class="sub"><span class="chip" style="background:'+hex6(L.c)+'">'+catOf(curQ)+' · '+tr.lane+' '+laneName+'</span> '+tr.qWord+' '+(round+1)+'/'+rounds+'</div><b class="q-txt">'+esc(cleanQ(curQ))+'</b>';
+   renderCards();
+  }
+ } else if(st === 'end'){
+  renderEndScreen(window._lastSec || 0);
+ }
+}
+
+$('lang-sel').addEventListener('change', e => {
+ setLanguage(e.target.value);
+});
+
+$('dlist').addEventListener('click',e=>{ 
+ const b=e.target.closest('[data-d]'); if(!b) return; 
+ D=DIFFS[+b.dataset.d]; 
+ 
+ if(autoMode) {
+  let filtered = BANK_ADIWIYATA.filter(q => q.diff === D.lv);
+  Q = JSON.parse(JSON.stringify(filtered));
+  if (+S.shuffle) {
+   for (let i = Q.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [Q[i], Q[j]] = [Q[j], Q[i]];
+   }
+  }
+ }
+ 
+ QT=Math.max(5,Math.round((+S.timer||20)*D.tm)); 
+ LT=D.lt; SCENE_SPEED=BASE_SPEED*D.sp; countdown(start); 
+});
+
+$('dBack').onclick=()=>show('s-menu');
+$('go').onclick=showDiff; $('again').onclick=()=>{ showDiff(); }; $('mn').onclick=()=>show('s-menu');
+$('nm').addEventListener('keydown',e=>{ if(e.key==='Enter') showDiff(); });
+$('cc').onclick=async()=>{ const r=window._rec, tr=I18N[curLang]; const t='Nama,Skor,Benar,Salah,Waktu(dtk),Tingkat,Tanggal\n'+[r.nama,r.skor,r.benar,r.salah,r.waktu,r.tingkat,r.tanggal].join(','); const done=await copy(t); $('cc').textContent=done?tr.copied:tr.copyFail; setTimeout(()=>$('cc').textContent=tr.copyRec,1800); };
+
+$('seasonBtn').onclick=()=>{
+ const sk=Object.keys(SEASONS), ns=sk[(sk.indexOf(currentSeason)+1)%sk.length];
+ applySeason(ns,false); currentWeather=pickWeather(); updateParticleColors(); updateSeasonBadge();
+ $('seasonBtn').textContent=SEASONS[ns].icon;
+};
+
+let lt=performance.now();
+function loop(now){
+ requestAnimationFrame(loop);
+ const dt=Math.min((now-lt)/1000,.05); lt=now; const ti=now*.001;
+ scroll+=SCENE_SPEED*dt; updTerrain();
+
+ if(waterMesh.visible){
+  waterMesh.position.y = GY + waterBaseY + Math.sin(ti*2)*0.15;
+ }
+ if(roadG.visible){
+  roadG.userData.d.forEach(d=>{ d.position.z+=SCENE_SPEED*dt; if(d.position.z>40) d.position.z-=420; });
+ }
+ decor.children.forEach(d=>{
+  const sp=d.userData.sp||1; d.position.z+=SCENE_SPEED*sp*dt;
+  if(d.position.z>40){
+   const nd=mk(d.userData.k,theme,rnd(-600,-480));
+   d.position.copy(nd.position);
+  }
+ });
+ cloudGroup.children.forEach(c=>{
+  c.position.z+=SCENE_SPEED*.55*dt;
+  if(c.position.z>50){ c.position.z=rnd(-900,-750); c.position.x=rnd(-300,300); }
+ });
+
+ const sp=18;
+ if(keys['arrowleft']||keys['a']) tg.x-=sp*dt;
+ if(keys['arrowright']||keys['d']) tg.x+=sp*dt;
+ if(keys['arrowup']||keys['w']) tg.y+=sp*dt;
+ if(keys['arrowdown']||keys['s']) tg.y-=sp*dt;
+ if(st==='lane'){
+  tg.x+=joy.x*sp*dt; tg.y-=joy.y*sp*dt;
+ } else if(st==='qa'){
+  joyCool=Math.max(0,joyCool-dt);
+  if(Math.hypot(joy.x,joy.y)>.45){
+   joyMoved=true;
+   if(joyCool<=0){
+    if(Math.abs(joy.x)>Math.abs(joy.y)) moveSel(joy.x>0?1:-1);
+    else moveSel(joy.y>0?2:-2);
+    joyCool=.22;
+   }
+  }
+ }
+ tg.x=Math.max(-16,Math.min(16,tg.x));
+ tg.y=Math.max(10,Math.min(28,tg.y));
+ const ox=px.x, oy=px.y;
+ px.x+=(tg.x-px.x)*Math.min(1,dt*8);
+ px.y+=(tg.y-px.y)*Math.min(1,dt*8);
+ plane.position.set(px.x,px.y,0);
+ pr.rotation.z=-(px.x-ox)*1.8;
+ pr.rotation.x=(px.y-oy)*1.2;
+ plane.fans.forEach(f=>f.rotation.z+=dt*28);
+ plane.glows.forEach(g=>g.scale.setScalar(.85+Math.sin(ti*30)*.1));
+ if(plane.strobe) plane.strobe.visible=Math.floor(ti*4)%2===0;
+
+ if(gates&&st==='lane'){
+  gates.position.z+=gs*dt;
+  if(gates.position.z>=0){
+   const nr=nearest();
+   chooseLane(nr.pick);
+  }
+ }
+ if(st==='qa'){
+  qt-=dt;
+  const pct=Math.max(0,qt/QT*100);
+  $('bar').style.width=pct+'%';
+  $('bar').style.background=pct>50?'var(--ok)':pct>25?'var(--acc)':'var(--bad)';
+  if(qt<=0) answer(-1,true);
+ }
+ for(let i=fx.length-1;i>=0;i--){
+  const f=fx[i]; f.l-=dt; f.m.position.addScaledVector(f.v,dt); f.v.y-=18*dt; f.m.rotation.x+=dt*5;
+  if(f.l<=0){ scene.remove(f.m); fx.splice(i,1); }
+ }
+
+ const wx=theme.cave||theme.space?'clear':currentWeather;
+ starMat.uniforms.time.value=ti;
+ const stT=theme.cave?0:(theme.night||theme.space)?1:(currentSeason==='dingin'?.3:currentSeason==='gugur'?.1:0);
+ starMat.uniforms.opacity.value+=(stT-starMat.uniforms.opacity.value)*.03;
+ stepParts(RAIN,(wx==='rain'||wx==='storm')?.8:0,40,0,1,dt,ti);
+ stepParts(SNOW,wx==='snow'?.9:0,15,.3,.7,dt,ti);
+ stepParts(PET,wx==='petals'?.85:0,10,.8,.8,dt,ti);
+ const fogT=wx==='fog'?.9:wx==='storm'?.5:0;
+ scene.fog.far+=(fogBase*(1-fogT*.7)-scene.fog.far)*.03;
+ const tf=baseFov; if(Math.abs(cam.fov-tf)>1e-3){cam.fov=tf;cam.updateProjectionMatrix();}
+ if(wx==='storm'){ lightningTimer-=dt; if(lightningTimer<=0){ lightningTimer=rnd(2,5); const lm=$('lightning'); lm.style.transition='none'; lm.style.opacity=.8; sndThunder();
+  setTimeout(()=>{lm.style.transition='opacity .3s';lm.style.opacity=0;},80);
+  setTimeout(()=>{lm.style.transition='none';lm.style.opacity=.5;setTimeout(()=>{lm.style.transition='opacity .5s';lm.style.opacity=0;},60);},180); } }
+ rbOp=(wx==='clear'&&!theme.night&&!theme.cave&&!theme.space&&(currentSeason==='semi'||currentSeason==='panas'))?Math.min(.35,rbOp+dt*.1):Math.max(0,rbOp-dt*.2);
+ rbMat.opacity=rbOp; rainbow.rotation.z=Math.PI+Math.sin(ti*.1)*.05;
+ const wd0=(theme.night||theme.space||theme.cave)?0:(wx==='storm'?.5:wx==='rain'?.3:wx==='fog'?.25:wx==='snow'?.15:0); wDim+=(wd0-wDim)*.02;
+ skyU.top.value.lerp(TMPC.copy(topT).lerp(GRAYC,wDim),.03); skyU.mid.value.lerp(TMPC.copy(midT).lerp(GRAYC,wDim),.03); skyU.bot.value.lerp(TMPC.copy(botT).lerp(GRAYC,wDim),.03); skyU.sunCol.value.lerp(sunT,.03);
+ sunGlow.material.opacity=sunBase[0]*Math.max(0,1-wDim*1.6); sunRays.material.opacity=sunBase[1]*Math.max(0,1-wDim*1.6);
+ scene.fog.color.copy(skyU.bot.value); scene.background.copy(skyU.bot.value);
+
+ shake=Math.max(0,shake-dt); const sh=shake*.8;
+ cam.position.set(px.x*.5+(Math.random()-.5)*sh, px.y*.8+7+(Math.random()-.5)*sh, 16);
+ cam.lookAt(px.x*.3, px.y*.5, -25);
+ renderer.render(scene,cam);
+}
+requestAnimationFrame(loop);
+
+$('splash').addEventListener('click', () => {
+    if ($('splash').classList.contains('open')) return;
+    $('splash').classList.add('open');
+    show('s-menu'); 
+    if(!AC){ try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(AC&&AC.state==='suspended')AC.resume();
+    beep(880,.15,'triangle'); 
+    setTimeout(() => {
+        $('splash').style.display = 'none';
+    }, 1000);
+});
+</script>
+</body>
+</html>
